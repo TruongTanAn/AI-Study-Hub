@@ -1,3 +1,6 @@
+## Project Structure
+
+```text
 AI-Study-Hub
 │
 ├── assets
@@ -21,3 +24,4 @@ AI-Study-Hub
 │
 ├── README.md
 └── index.php
+```
