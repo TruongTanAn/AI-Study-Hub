@@ -12,15 +12,40 @@ AI-Study-Hub
 │   └── database.php
 │
 ├── database
-│   └── database.sql
+│   ├── database.sql
+│   └── ERD.drawio
+│
+├── includes
+│   ├── header.php
+│   ├── footer.php
+│   ├── navbar.php
+│   └── auth_check.php
 │
 ├── pages
 │   ├── login.php
-│   ├── chatbot.php
-│   └── upload.php
+│   ├── register.php
+│   ├── dashboard.php
+│   ├── profile.php
+│   ├── upload.php
+│   ├── documents.php
+│   └── chatbot.php
 │
 ├── backend
-│   └── upload_document.php
+│   ├── login_process.php
+│   ├── register_process.php
+│   ├── logout.php
+│   ├── upload_document.php
+│   ├── delete_document.php
+│   ├── search_document.php
+│   └── chat_api.php
+│
+├── uploads
+│   ├── pdf
+│   ├── docx
+│   └── pptx
+│
+├── reports
+│   └── week1
 │
 ├── README.md
 └── index.php
