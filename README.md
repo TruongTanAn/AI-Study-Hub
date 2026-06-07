@@ -20,5 +20,4 @@ AI-Study-Hub
 │   └── upload_document.php
 │
 ├── README.md
-│
 └── index.php
