@@ -67,16 +67,4 @@ camelCase.
 
 ---
 
-## Git Branch
 
-feature/login
-
-feature/upload-document
-
-feature/chatbot
-
-bugfix/login
-
-hotfix/database
-
-Không commit trực tiếp vào main.

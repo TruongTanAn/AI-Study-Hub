@@ -12,8 +12,8 @@ AI-Study-Hub
 │   └── database.php
 │
 ├── database
-│   ├── database.sql
-│   └── ERD.drawio
+│   └── database.sql
+│  
 │
 ├── includes
 │   ├── header.php
