@@ -1,46 +1,150 @@
-CREATE TABLE `users` (
-  `user_id` int PRIMARY KEY,
-  `full_name` varchar(255),
-  `email` varchar(255),
-  `password` varchar(255),
-  `avatar` varchar(255),
-  `role` varchar(255),
-  `created_at` datetime
+CREATE DATABASE ai_study_hub;
+USE ai_study_hub;
+
+-- =====================================
+-- USERS
+-- =====================================
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    avatar VARCHAR(255) DEFAULT 'default.png',
+    role ENUM('admin','user') DEFAULT 'user',
+    status ENUM('active','blocked') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE `documents` (
-  `document_id` int PRIMARY KEY,
-  `user_id` int,
-  `title` varchar(255),
-  `description` text,
-  `file_name` varchar(255),
-  `file_type` varchar(255),
-  `upload_date` datetime
+-- =====================================
+-- CATEGORIES
+-- =====================================
+
+CREATE TABLE categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE `categories` (
-  `category_id` int PRIMARY KEY,
-  `category_name` varchar(255)
+-- =====================================
+-- DOCUMENTS
+-- =====================================
+
+CREATE TABLE documents (
+    document_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    file_type VARCHAR(50),
+
+    file_size BIGINT,
+
+    download_count INT DEFAULT 0,
+
+    status ENUM('pending','approved','rejected')
+    DEFAULT 'approved',
+
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE
 );
 
-CREATE TABLE `document_categories` (
-  `id` int PRIMARY KEY,
-  `document_id` int,
-  `category_id` int
+-- =====================================
+-- DOCUMENT CATEGORY
+-- =====================================
+
+CREATE TABLE document_categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    document_id INT NOT NULL,
+    category_id INT NOT NULL,
+
+    FOREIGN KEY (document_id)
+    REFERENCES documents(document_id)
+    ON DELETE CASCADE,
+
+    FOREIGN KEY (category_id)
+    REFERENCES categories(category_id)
+    ON DELETE CASCADE
 );
 
-CREATE TABLE `chat_history` (
-  `chat_id` int PRIMARY KEY,
-  `user_id` int,
-  `question` text,
-  `answer` text,
-  `created_at` datetime
+-- =====================================
+-- CHAT HISTORY
+-- =====================================
+
+CREATE TABLE chat_history (
+    chat_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    question TEXT NOT NULL,
+    answer LONGTEXT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE
 );
 
-ALTER TABLE `documents` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+-- =====================================
+-- DOWNLOAD HISTORY
+-- =====================================
 
-ALTER TABLE `chat_history` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+CREATE TABLE download_history (
+    download_id INT AUTO_INCREMENT PRIMARY KEY,
 
-ALTER TABLE `document_categories` ADD FOREIGN KEY (`document_id`) REFERENCES `documents` (`document_id`);
+    user_id INT NOT NULL,
+    document_id INT NOT NULL,
 
-ALTER TABLE `document_categories` ADD FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`);
+    downloaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE,
+
+    FOREIGN KEY (document_id)
+    REFERENCES documents(document_id)
+    ON DELETE CASCADE
+);
+
+-- =====================================
+-- ACTIVITY LOG
+-- =====================================
+
+CREATE TABLE activity_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT,
+
+    action VARCHAR(255),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
+    ON DELETE SET NULL
+);
+
+-- =====================================
+-- PASSWORD RESET
+-- =====================================
+
+CREATE TABLE password_resets (
+    reset_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    token VARCHAR(255) NOT NULL,
+
+    expires_at DATETIME,
+
+    FOREIGN KEY (user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE
+);
