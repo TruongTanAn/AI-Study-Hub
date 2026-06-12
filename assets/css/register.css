@@ -1,0 +1,502 @@
+/* ==========================================
+   AI STUDY HUB - REGISTER PAGE (FULLY ALIGNED WITH HOME)
+   ========================================== */
+
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --dark: #111827;
+    --gray: #6b7280;
+    --light: #f8fafc;
+    --white: #ffffff;
+    --border: #e5e7eb;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Đồng bộ màu nền gradient sáng dịu từ trang chủ */
+    --gradient-bg-home: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 50%, #fae8ff 100%);
+    /* Dải màu gradient thương hiệu rực rỡ dùng cho các nút/link */
+    --gradient-brand: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--gradient-bg-home);
+    /* Đồng bộ nền toàn trang */
+    color: var(--dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ====================== SPLIT LAYOUT ====================== */
+.register-wrapper {
+    display: flex;
+    min-height: 100vh;
+    padding: 40px;
+    /* Thêm padding bên ngoài để tạo cảm giác sang trọng, thoáng đãng */
+    background: var(--gradient-bg-home);
+    gap: 30px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==================== LEFT BANNER (TRANSFORMED TO LIGHT DASHBOARD) ==================== */
+.register-banner {
+    flex: 1.1;
+    /* Biến đổi từ nền tối sang nền trắng mờ kính cao cấp giống Dashboard trang chủ */
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    /* Bo góc tròn mềm mại */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 50px;
+    color: var(--dark) !important;
+    /* Đổi chữ sang màu tối */
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+    min-height: calc(100vh - 80px);
+}
+
+/* Xóa bỏ hiệu ứng dấu chấm đen và các mảng màu tối ngầm */
+.register-banner::before,
+.register-banner::after {
+    display: none !important;
+}
+
+.banner-inner {
+    position: relative;
+    z-index: 3;
+    max-width: 460px;
+}
+
+.logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--dark) !important;
+    /* Đổi màu chữ logo sang màu tối */
+    text-decoration: none;
+    font-size: 1.85rem;
+    font-weight: 700;
+    margin-bottom: 48px;
+    transition: var(--transition);
+}
+
+.logo-link:hover {
+    transform: translateX(8px);
+    color: var(--primary) !important;
+}
+
+.logo-icon {
+    font-size: 2.4rem;
+    filter: none;
+    /* Bỏ đổ bóng đen cũ */
+}
+
+.banner-inner h1 {
+    font-size: 2.8rem;
+    line-height: 1.15;
+    font-weight: 800;
+    margin-bottom: 20px;
+    /* Chữ tiêu đề đổi sang màu tối đậm của trang chủ */
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    color: var(--dark) !important;
+}
+
+.banner-inner p {
+    font-size: 1.15rem;
+    line-height: 1.65;
+    color: #4b5563 !important;
+    /* Màu xám chữ chuẩn của trang chủ */
+    margin-bottom: 48px;
+}
+
+/* Features */
+.banner-features {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.feature-item {
+    display: flex;
+    gap: 18px;
+}
+
+.feature-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    /* Biến icon thành nền xanh tím nhạt tinh tế */
+    background: #e0e7ff !important;
+    border: 1px solid #c7d2fe !important;
+    color: var(--primary) !important;
+    /* Màu icon tím nổi bật */
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+
+.feature-info h3 {
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.feature-info p {
+    font-size: 0.97rem;
+    color: #6b7280 !important;
+    /* Sửa màu chữ nhỏ dễ đọc hơn */
+    line-height: 1.5;
+}
+
+/* ==================== RIGHT FORM ==================== */
+.register-form-container {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.85) !important;
+    /* Form màu trắng mờ đồng bộ */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04) !important;
+    min-height: calc(100vh - 80px);
+}
+
+.register-form {
+    width: 100%;
+    max-width: 460px;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.form-header h2 {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: var(--gray);
+    font-size: 1.02rem;
+}
+
+/* Link "Đăng nhập ngay" đổi sang màu hồng để tạo điểm nhấn ăn nhập trang chủ */
+.form-header a {
+    color: var(--secondary) !important;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.form-header a:hover {
+    color: var(--primary-dark) !important;
+    text-decoration: underline;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 26px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.form-input {
+    width: 100%;
+    padding: 15px 16px 15px 48px;
+    font-size: 1rem;
+    background: #f8fafc;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    transition: var(--transition);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15);
+}
+
+.input-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1.25rem;
+    transition: var(--transition);
+}
+
+.form-input:focus+.input-icon {
+    color: var(--primary);
+}
+
+/* Validation */
+.form-input.is-invalid {
+    border-color: var(--danger);
+    background: #fef2f2;
+}
+
+.form-input.is-invalid:focus {
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.15);
+}
+
+.form-input.is-valid {
+    border-color: var(--success);
+    background: #f0fdf4;
+}
+
+.form-input.is-valid:focus {
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.15);
+}
+
+/* Error Message */
+.error-message {
+    font-size: 0.85rem;
+    color: var(--danger);
+    margin-top: 7px;
+    display: none;
+    font-weight: 500;
+}
+
+.error-message.active {
+    display: block;
+}
+
+/* Password Strength */
+.password-strength-wrapper {
+    margin-top: 12px;
+}
+
+.strength-meter-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.strength-meter-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 999px;
+}
+
+.strength-text {
+    font-size: 0.85rem;
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+/* Requirements */
+.password-requirements {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-top: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.password-requirements.active {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 14px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+}
+
+.requirements-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.requirement-item {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gray);
+    transition: var(--transition);
+}
+
+.requirement-item.met {
+    color: var(--success);
+    font-weight: 500;
+}
+
+.requirement-item.unmet {
+    color: var(--gray);
+}
+
+.requirement-item i {
+    font-size: 0.95rem;
+}
+
+/* Terms */
+.terms-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 28px 0 20px;
+    cursor: pointer;
+}
+
+.terms-checkbox {
+    accent-color: var(--primary);
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+}
+
+/* Button Submit - Giữ dải màu chuyển Tím-Hồng của trang chủ cực đẹp */
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: var(--gradient-brand) !important;
+    color: white;
+    font-size: 1.08rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.25) !important;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(236, 72, 153, 0.35) !important;
+    opacity: 0.95;
+}
+
+.btn-submit:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Alert */
+.alert {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* ====================== RESPONSIVE ====================== */
+@media (max-width: 1024px) {
+    .register-wrapper {
+        padding: 20px;
+    }
+
+    .register-banner {
+        padding: 50px 40px;
+    }
+}
+
+@media (max-width: 900px) {
+    .register-wrapper {
+        flex-direction: column;
+        padding: 15px;
+        gap: 20px;
+    }
+
+    .register-banner,
+    .register-form-container {
+        min-height: auto;
+        width: 100%;
+    }
+
+    .register-banner {
+        padding: 40px 30px;
+        text-align: center;
+    }
+
+    .logo-link {
+        margin-bottom: 24px;
+        justify-content: center;
+    }
+
+    .banner-features {
+        display: none;
+    }
+
+    .register-form-container {
+        padding: 40px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner-inner h1 {
+        font-size: 2.1rem;
+    }
+
+    .form-header h2 {
+        font-size: 1.85rem;
+    }
+
+    .form-input {
+        padding: 13px 14px 13px 46px;
+    }
+}
