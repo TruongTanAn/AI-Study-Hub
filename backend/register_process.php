@@ -4,13 +4,9 @@ include "../config/database.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // Nhận dữ liệu từ Form Register
-
     $fullName = trim($_POST["full_name"]);
     $email = trim($_POST["email"]);
     $password = trim($_POST["password"]);
-
-    // Kiểm tra họ tên
 
     if (empty($fullName)) {
         die("Vui lòng nhập họ tên");
@@ -20,8 +16,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Họ tên quá ngắn");
     }
 
-    // Kiểm tra email
-
     if (empty($email)) {
         die("Vui lòng nhập email");
     }
@@ -29,8 +23,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         die("Email không hợp lệ");
     }
-
-    // Kiểm tra mật khẩu
 
     if (empty($password)) {
         die("Vui lòng nhập mật khẩu");
@@ -40,45 +32,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Mật khẩu phải từ 6 ký tự trở lên");
     }
 
-    // Kiểm tra email đã tồn tại
+    $sql = "SELECT * FROM users WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    $sql = "SELECT * FROM users WHERE email = '$email'";
-
-    $result = mysqli_query($conn, $sql);
-
-    if (mysqli_num_rows($result) > 0) {
+    if ($result->num_rows > 0) {
+        $stmt->close();
         die("Email đã tồn tại");
     }
 
-    // Mã hóa mật khẩu
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-    $password = password_hash($password, PASSWORD_DEFAULT);
+    $sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('sss', $fullName, $email, $passwordHash);
 
-    // Thêm tài khoản
-
-    $sql = "INSERT INTO users
-    (full_name, email, password)
-
-    VALUES
-
-    ('$fullName', '$email', '$password')";
-
-    if (mysqli_query($conn, $sql)) {
-
-        echo json_encode([
-            "success" => true,
-            "message" => "Register success"
-        ]);
-
+    if ($stmt->execute()) {
+        header("Location: ../pages/login.php?success=" . urlencode("Đăng ký thành công! Vui lòng đăng nhập."));
+        exit();
     } else {
-
-        echo json_encode([
-            "success" => false,
-            "message" => "Register failed"
-        ]);
-
+        die("Đăng ký thất bại");
     }
-
 }
-
-?>

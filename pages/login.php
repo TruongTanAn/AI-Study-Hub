@@ -1,17 +1,26 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $error = "";
 $success = "";
 
-// Hiển thị lỗi
+if (isset($_SESSION['error_message'])) {
+    $error = $_SESSION['error_message'];
+    unset($_SESSION['error_message']);
+}
+
 if (isset($_GET['error'])) {
     $error = $_GET['error'];
 }
 
-// Hiển thị thông báo thành công
 if (isset($_GET['success'])) {
     $success = $_GET['success'];
+}
+
+if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
+    $success = "Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập với mật khẩu mới.";
 }
 ?>
 
