@@ -1,4 +1,5 @@
 <?php
+
 /**
  * auth_check.php
  * Kiểm tra người dùng đã đăng nhập trước khi truy cập các trang yêu cầu xác thực.
@@ -14,5 +15,11 @@ if (session_status() === PHP_SESSION_NONE) {
 if (!isset($_SESSION['user_id'])) {
     // Đường dẫn tương đối theo URL trang hiện tại (pages/*.php)
     header('Location: login.php');
+
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../pages/login.php");
+
     exit();
 }
