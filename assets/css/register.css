@@ -1,0 +1,545 @@
+/* ==========================================
+   AI STUDY HUB - REGISTER PAGE
+   Modern SaaS Style - Glassmorphism
+   ========================================== */
+
+:root {
+    --primary: #7C3AED;
+    --primary-light: #8B5CF6;
+    --primary-lighter: #A78BFA;
+    --primary-bg: #F5F3FF;
+    --white: #FFFFFF;
+    --dark: #1E1B4B;
+    --gray: #64748B;
+    --gray-light: #94A3B8;
+    --border: #E2E8F0;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --gradient-primary: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+    --gradient-bg: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 50%, #DDD6FE 100%);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--gradient-bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* ==========================================
+   MAIN CONTAINER
+   ========================================== */
+
+.register-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 700px;
+    background: var(--white);
+    border-radius: 24px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   LEFT SIDE - BRANDING
+   ========================================== */
+
+.register-left {
+    flex: 45;
+    background: var(--gradient-primary);
+    padding: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-left::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.register-left::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -30%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.left-content {
+    position: relative;
+    z-index: 1;
+    max-width: 420px;
+    width: 100%;
+}
+
+/* Brand Logo */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+}
+
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-icon i {
+    font-size: 24px;
+    color: var(--white);
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+/* Hero Text */
+.hero-text {
+    margin-bottom: 40px;
+}
+
+.hero-text h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 16px;
+}
+
+.hero-text p {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+}
+
+/* Features List */
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.feature-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feature-icon i {
+    font-size: 20px;
+    color: var(--white);
+}
+
+.feature-text h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 4px;
+}
+
+.feature-text p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Illustration */
+.illustration {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.illus-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+    min-width: 100px;
+}
+
+.illus-card:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-4px);
+}
+
+.illus-card i {
+    font-size: 28px;
+    color: var(--white);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.illus-card span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ==========================================
+   RIGHT SIDE - FORM
+   ========================================== */
+
+.register-right {
+    flex: 55;
+    padding: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+}
+
+.form-card {
+    width: 100%;
+    max-width: 440px;
+}
+
+/* Form Header */
+.form-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.form-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+
+.form-header p {
+    font-size: 15px;
+    color: var(--gray);
+}
+
+.form-header a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.form-header a:hover {
+    color: var(--primary-light);
+    text-decoration: underline;
+}
+
+/* Form */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--gray-light);
+    font-size: 18px;
+    transition: var(--transition);
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    height: 52px;
+    padding: 0 48px;
+    font-size: 15px;
+    color: var(--dark);
+    background: var(--primary-bg);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.input-wrapper input::placeholder {
+    color: var(--gray-light);
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.input-wrapper input:focus + .input-icon,
+.input-wrapper:focus-within .input-icon {
+    color: var(--primary);
+}
+
+/* Toggle Password */
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-light);
+    font-size: 18px;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+}
+
+/* Register Button */
+.btn-register {
+    height: 52px;
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+    transition: var(--transition);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.5);
+}
+
+.btn-register:active {
+    transform: translateY(0);
+}
+
+.btn-register i {
+    font-size: 18px;
+    transition: var(--transition);
+}
+
+.btn-register:hover i {
+    transform: translateX(4px);
+}
+
+/* Form Footer */
+.form-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.form-footer p {
+    font-size: 13px;
+    color: var(--gray);
+}
+
+.form-footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================
+   RESPONSIVE - TABLET
+   ========================================== */
+
+@media (max-width: 1024px) {
+    .register-left {
+        padding: 40px;
+    }
+
+    .register-right {
+        padding: 40px;
+    }
+
+    .hero-text h1 {
+        font-size: 28px;
+    }
+
+    .illus-card {
+        min-width: 85px;
+        padding: 16px;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - MOBILE
+   ========================================== */
+
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .register-container {
+        flex-direction: column;
+        min-height: auto;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .register-left {
+        flex: none;
+        padding: 40px 24px;
+    }
+
+    .register-left .features-list,
+    .register-left .illustration {
+        display: none;
+    }
+
+    .brand-logo {
+        margin-bottom: 24px;
+    }
+
+    .hero-text {
+        margin-bottom: 0;
+    }
+
+    .hero-text h1 {
+        font-size: 26px;
+    }
+
+    .hero-text p {
+        font-size: 14px;
+    }
+
+    .register-right {
+        flex: none;
+        padding: 40px 24px;
+    }
+
+    .form-card {
+        max-width: 100%;
+    }
+
+    .form-header h2 {
+        font-size: 24px;
+    }
+
+    .input-wrapper input {
+        height: 48px;
+    }
+
+    .btn-register {
+        height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-left {
+        padding: 32px 20px;
+    }
+
+    .register-right {
+        padding: 32px 20px;
+    }
+
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .logo-icon i {
+        font-size: 20px;
+    }
+
+    .logo-text {
+        font-size: 20px;
+    }
+
+    .hero-text h1 {
+        font-size: 22px;
+    }
+
+    .form-header h2 {
+        font-size: 20px;
+    }
+}
