@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 CREATE DATABASE ai_study_hub;
 USE ai_study_hub;
+=======
+
+>>>>>>> origin/hoa-fe
 
 -- =====================================
 -- USERS

@@ -108,6 +108,10 @@ require_once '../includes/auth_check.php';
         </div>
         <div class="user-info">
             <span>Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong></span>
+<<<<<<< HEAD
+=======
+            <a href="profile.php"><i class="fas fa-user"></i> Hồ sơ</a>
+>>>>>>> origin/hoa-fe
             <a href="../backend/logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
     </header>
