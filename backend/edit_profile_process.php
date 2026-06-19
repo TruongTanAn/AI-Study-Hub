@@ -83,7 +83,7 @@ if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
     $fileNameCmps = explode(".", $fileName);
     $fileExtension = strtolower(end($fileNameCmps));
     
-    $allowedExtensions = array('jpg', 'jpeg', 'png', 'gif');
+    $allowedExtensions = array('jpg', 'jpeg', 'png', 'gif', 'webp');
     if (in_array($fileExtension, $allowedExtensions)) {
         // Limit to 2MB
         $maxSize = 2 * 1024 * 1024;

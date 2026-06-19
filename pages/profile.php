@@ -24,35 +24,35 @@ if (!$user) {
 // Stats Query
 // 1. Uploaded documents
 $uploadCount = 0;
-$sqlUpload = "SELECT COUNT(*) AS total FROM documents WHERE user_id = ?";
-if ($stmtUpload = $conn->prepare($sqlUpload)) {
-    $stmtUpload->bind_param('i', $userId);
-    $stmtUpload->execute();
-    $res = $stmtUpload->get_result()->fetch_assoc();
-    $uploadCount = $res['total'];
-    $stmtUpload->close();
+@$sqlUpload = "SELECT COUNT(*) AS total FROM documents WHERE user_id = ?";
+if (@$stmtUpload = @$conn->prepare(@$sqlUpload)) {
+    @$stmtUpload->bind_param('i', $userId);
+    @$stmtUpload->execute();
+    @$res = @$stmtUpload->get_result()->fetch_assoc();
+    $uploadCount = @$res['total'] ?? 0;
+    @$stmtUpload->close();
 }
 
 // 2. Downloaded documents
 $downloadCount = 0;
-$sqlDownload = "SELECT COUNT(*) AS total FROM download_history WHERE user_id = ?";
-if ($stmtDownload = $conn->prepare($sqlDownload)) {
-    $stmtDownload->bind_param('i', $userId);
-    $stmtDownload->execute();
-    $res = $stmtDownload->get_result()->fetch_assoc();
-    $downloadCount = $res['total'];
-    $stmtDownload->close();
+@$sqlDownload = "SELECT COUNT(*) AS total FROM downloads WHERE user_id = ?";
+if (@$stmtDownload = @$conn->prepare(@$sqlDownload)) {
+    @$stmtDownload->bind_param('i', $userId);
+    @$stmtDownload->execute();
+    @$res = @$stmtDownload->get_result()->fetch_assoc();
+    $downloadCount = @$res['total'] ?? 0;
+    @$stmtDownload->close();
 }
 
 // 3. AI Chat questions
 $chatCount = 0;
-$sqlChat = "SELECT COUNT(*) AS total FROM chat_history WHERE user_id = ?";
-if ($stmtChat = $conn->prepare($sqlChat)) {
-    $stmtChat->bind_param('i', $userId);
-    $stmtChat->execute();
-    $res = $stmtChat->get_result()->fetch_assoc();
-    $chatCount = $res['total'];
-    $stmtChat->close();
+@$sqlChat = "SELECT COUNT(*) AS total FROM chat_sessions WHERE user_id = ?";
+if (@$stmtChat = @$conn->prepare(@$sqlChat)) {
+    @$stmtChat->bind_param('i', $userId);
+    @$stmtChat->execute();
+    @$res = @$stmtChat->get_result()->fetch_assoc();
+    $chatCount = @$res['total'] ?? 0;
+    @$stmtChat->close();
 }
 
 // Format Join Date: "dd/mm/yyyy"

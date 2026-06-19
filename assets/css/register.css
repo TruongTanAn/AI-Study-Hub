@@ -1,27 +1,14 @@
-/* ==========================================
-   AI STUDY HUB - REGISTER PAGE
-   Modern SaaS Style - Glassmorphism
-   ========================================== */
-
 :root {
-    --primary: #7C3AED;
-    --primary-light: #8B5CF6;
-    --primary-lighter: #A78BFA;
-    --primary-bg: #F5F3FF;
-    --white: #FFFFFF;
-    --dark: #1E1B4B;
-    --gray: #64748B;
-    --gray-light: #94A3B8;
-    --border: #E2E8F0;
-    --success: #22C55E;
-    --danger: #EF4444;
-    --gradient-primary: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
-    --gradient-bg: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 50%, #DDD6FE 100%);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --white: #ffffff;
+    --dark: #1e293b;
+    --gray: #64748b;
+    --gray-light: #94a3b8;
+    --border: #e2e8f0;
+    --success: #22c55e;
+    --danger: #ef4444;
 }
 
 * {
@@ -31,247 +18,120 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--gradient-bg);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
     min-height: 100vh;
+}
+
+.register-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.register-banner {
+    flex: 1;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 60px 50px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-/* ==========================================
-   MAIN CONTAINER
-   ========================================== */
-
-.register-container {
-    display: flex;
-    width: 100%;
-    max-width: 1200px;
-    min-height: 700px;
-    background: var(--white);
-    border-radius: 24px;
-    box-shadow: var(--shadow-xl);
-    overflow: hidden;
-    animation: fadeIn 0.6s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ==========================================
-   LEFT SIDE - BRANDING
-   ========================================== */
-
-.register-left {
-    flex: 45;
-    background: var(--gradient-primary);
-    padding: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: relative;
     overflow: hidden;
 }
 
-.register-left::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.register-left::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -30%;
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.left-content {
+.banner-inner {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     max-width: 420px;
-    width: 100%;
 }
 
-/* Brand Logo */
-.brand-logo {
-    display: flex;
+.logo-link {
+    display: inline-flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 48px;
-}
-
-.logo-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.logo-icon i {
-    font-size: 24px;
-    color: var(--white);
-}
-
-.logo-text {
-    font-size: 24px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.8rem;
     font-weight: 700;
-    color: var(--white);
-}
-
-/* Hero Text */
-.hero-text {
     margin-bottom: 40px;
 }
 
-.hero-text h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--white);
+.logo-icon {
+    font-size: 2.2rem;
+}
+
+.register-banner h1 {
+    font-size: 2.4rem;
     line-height: 1.2;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
-.hero-text p {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.6;
+.register-banner p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 40px;
 }
 
-/* Features List */
-.features-list {
+.banner-features {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    margin-bottom: 48px;
 }
 
 .feature-item {
     display: flex;
-    align-items: flex-start;
     gap: 16px;
 }
 
-.feature-icon {
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
+.feature-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.5rem;
     flex-shrink: 0;
 }
 
-.feature-icon i {
-    font-size: 20px;
-    color: var(--white);
-}
-
-.feature-text h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--white);
+.feature-item h3 {
+    font-size: 1.1rem;
     margin-bottom: 4px;
 }
 
-.feature-text p {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+.feature-item p {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin: 0;
 }
 
-/* Illustration */
-.illustration {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
-
-.illus-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    transition: var(--transition);
-    min-width: 100px;
-}
-
-.illus-card:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-4px);
-}
-
-.illus-card i {
-    font-size: 28px;
-    color: var(--white);
-    display: block;
-    margin-bottom: 8px;
-}
-
-.illus-card span {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* ==========================================
-   RIGHT SIDE - FORM
-   ========================================== */
-
-.register-right {
-    flex: 55;
-    padding: 60px;
+.register-form-container {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--white);
+    padding: 40px 20px;
+    background: white;
 }
 
-.form-card {
+.register-form {
     width: 100%;
-    max-width: 440px;
+    max-width: 460px;
 }
 
-/* Form Header */
 .form-header {
     text-align: center;
     margin-bottom: 32px;
 }
 
 .form-header h2 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--dark);
+    font-size: 2rem;
     margin-bottom: 8px;
+    color: #1e2937;
 }
 
 .form-header p {
-    font-size: 15px;
     color: var(--gray);
 }
 
@@ -279,131 +139,111 @@ body {
     color: var(--primary);
     font-weight: 600;
     text-decoration: none;
-    transition: var(--transition);
 }
 
 .form-header a:hover {
-    color: var(--primary-light);
     text-decoration: underline;
 }
 
-/* Form */
-.register-form {
+.alert {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-success {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #ef4444;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    margin-bottom: 24px;
 }
 
-.form-group label {
-    font-size: 14px;
+.form-label {
+    display: block;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--dark);
+    margin-bottom: 8px;
 }
 
 .input-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
 .input-icon {
     position: absolute;
-    left: 16px;
-    color: var(--gray-light);
-    font-size: 18px;
-    transition: var(--transition);
-    pointer-events: none;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1.2rem;
 }
 
-.input-wrapper input {
-    width: 100%;
-    height: 52px;
-    padding: 0 48px;
-    font-size: 15px;
-    color: var(--dark);
-    background: var(--primary-bg);
-    border: 2px solid transparent;
-    border-radius: 12px;
-    transition: var(--transition);
-}
-
-.input-wrapper input::placeholder {
-    color: var(--gray-light);
-}
-
-.input-wrapper input:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: var(--white);
-    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
-}
-
-.input-wrapper input:focus + .input-icon,
-.input-wrapper:focus-within .input-icon {
-    color: var(--primary);
-}
-
-/* Toggle Password */
 .toggle-password {
     position: absolute;
     right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
     color: var(--gray-light);
-    font-size: 18px;
+    font-size: 1.1rem;
     padding: 0;
-    transition: var(--transition);
 }
 
 .toggle-password:hover {
     color: var(--primary);
 }
 
-/* Register Button */
-.btn-register {
-    height: 52px;
-    background: var(--gradient-primary);
-    color: var(--white);
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
     border: none;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-top: 8px;
-    transition: var(--transition);
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    margin-top: 10px;
+    transition: all 0.3s;
 }
 
-.btn-register:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.5);
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
 }
 
-.btn-register:active {
-    transform: translateY(0);
-}
-
-.btn-register i {
-    font-size: 18px;
-    transition: var(--transition);
-}
-
-.btn-register:hover i {
-    transform: translateX(4px);
-}
-
-/* Form Footer */
 .form-footer {
     text-align: center;
     margin-top: 24px;
@@ -412,7 +252,7 @@ body {
 }
 
 .form-footer p {
-    font-size: 13px;
+    font-size: 0.9rem;
     color: var(--gray);
 }
 
@@ -426,120 +266,36 @@ body {
     text-decoration: underline;
 }
 
-/* ==========================================
-   RESPONSIVE - TABLET
-   ========================================== */
-
 @media (max-width: 1024px) {
-    .register-left {
-        padding: 40px;
+    .register-banner {
+        padding: 40px 30px;
     }
-
-    .register-right {
-        padding: 40px;
-    }
-
-    .hero-text h1 {
-        font-size: 28px;
-    }
-
-    .illus-card {
-        min-width: 85px;
-        padding: 16px;
+    .register-banner h1 {
+        font-size: 2rem;
     }
 }
-
-/* ==========================================
-   RESPONSIVE - MOBILE
-   ========================================== */
 
 @media (max-width: 768px) {
-    body {
-        padding: 0;
-    }
-
-    .register-container {
+    .register-wrapper {
         flex-direction: column;
-        min-height: auto;
-        border-radius: 0;
-        box-shadow: none;
     }
-
-    .register-left {
-        flex: none;
+    .register-banner {
         padding: 40px 24px;
     }
-
-    .register-left .features-list,
-    .register-left .illustration {
+    .banner-features {
         display: none;
     }
-
-    .brand-logo {
+    .logo-link {
+        font-size: 1.4rem;
         margin-bottom: 24px;
     }
-
-    .hero-text {
-        margin-bottom: 0;
+    .register-banner h1 {
+        font-size: 1.6rem;
     }
-
-    .hero-text h1 {
-        font-size: 26px;
+    .register-banner p {
+        font-size: 1rem;
     }
-
-    .hero-text p {
-        font-size: 14px;
-    }
-
-    .register-right {
-        flex: none;
-        padding: 40px 24px;
-    }
-
-    .form-card {
-        max-width: 100%;
-    }
-
-    .form-header h2 {
-        font-size: 24px;
-    }
-
-    .input-wrapper input {
-        height: 48px;
-    }
-
-    .btn-register {
-        height: 48px;
-    }
-}
-
-@media (max-width: 480px) {
-    .register-left {
-        padding: 32px 20px;
-    }
-
-    .register-right {
-        padding: 32px 20px;
-    }
-
-    .logo-icon {
-        width: 40px;
-        height: 40px;
-    }
-
-    .logo-icon i {
-        font-size: 20px;
-    }
-
-    .logo-text {
-        font-size: 20px;
-    }
-
-    .hero-text h1 {
-        font-size: 22px;
-    }
-
-    .form-header h2 {
-        font-size: 20px;
+    .register-form-container {
+        padding: 30px 20px;
     }
 }

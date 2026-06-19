@@ -1,58 +1,89 @@
 <?php
+session_start();
 
-include "../config/database.php";
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+require_once "../config/database.php";
 
-    $fullName = trim($_POST["full_name"]);
-    $email = trim($_POST["email"]);
-    $password = trim($_POST["password"]);
+$fullName = trim($_POST["full_name"] ?? '');
+$email = trim($_POST["email"] ?? '');
+$password = $_POST["password"] ?? '';
+$confirmPassword = $_POST["confirm_password"] ?? '';
 
-    if (empty($fullName)) {
-        die("Vui lòng nhập họ tên");
-    }
+if (empty($fullName)) {
+    $_SESSION['error_message'] = "Họ và tên không được để trống.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    if (strlen($fullName) < 2) {
-        die("Họ tên quá ngắn");
-    }
+if (strlen($fullName) < 2) {
+    $_SESSION['error_message'] = "Họ tên phải có ít nhất 2 ký tự.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    if (empty($email)) {
-        die("Vui lòng nhập email");
-    }
+if (empty($email)) {
+    $_SESSION['error_message'] = "Email không được để trống.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die("Email không hợp lệ");
-    }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $_SESSION['error_message'] = "Email không hợp lệ.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    if (empty($password)) {
-        die("Vui lòng nhập mật khẩu");
-    }
+if (empty($password)) {
+    $_SESSION['error_message'] = "Mật khẩu không được để trống.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    if (strlen($password) < 6) {
-        die("Mật khẩu phải từ 6 ký tự trở lên");
-    }
+if (strlen($password) < 6) {
+    $_SESSION['error_message'] = "Mật khẩu phải từ 6 ký tự trở lên.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    $sql = "SELECT * FROM users WHERE email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('s', $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+if ($password !== $confirmPassword) {
+    $_SESSION['error_message'] = "Mật khẩu xác nhận không khớp.";
+    header("Location: ../pages/register.php");
+    exit();
+}
 
-    if ($result->num_rows > 0) {
-        $stmt->close();
-        die("Email đã tồn tại");
-    }
+$sql = "SELECT user_id FROM users WHERE email = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('s', $email);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+if ($result->num_rows > 0) {
+    $stmt->close();
+    $_SESSION['error_message'] = "Email đã được sử dụng bởi tài khoản khác.";
+    header("Location: ../pages/register.php");
+    exit();
+}
+$stmt->close();
 
-    $sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sss', $fullName, $email, $passwordHash);
+$passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-    if ($stmt->execute()) {
-        header("Location: ../pages/login.php?success=" . urlencode("Đăng ký thành công! Vui lòng đăng nhập."));
-        exit();
-    } else {
-        die("Đăng ký thất bại");
-    }
+$sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('sss', $fullName, $email, $passwordHash);
+
+if ($stmt->execute()) {
+    $stmt->close();
+    $conn->close();
+    header("Location: ../pages/login.php?success=" . urlencode("Đăng ký thành công! Vui lòng đăng nhập."));
+    exit();
+} else {
+    $stmt->close();
+    $conn->close();
+    $_SESSION['error_message'] = "Đăng ký thất bại. Vui lòng thử lại.";
+    header("Location: ../pages/register.php");
+    exit();
 }
