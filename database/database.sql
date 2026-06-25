@@ -24,12 +24,20 @@ CREATE TABLE IF NOT EXISTS documents (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     file_name VARCHAR(255) NOT NULL,
-    file_path VARCHAR(255) NOT NULL,
-    file_type VARCHAR(50),
-    file_size BIGINT,
+    original_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    cloud_url VARCHAR(500),
+    file_type VARCHAR(50) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size BIGINT NOT NULL,
+    cloud_provider ENUM('local','gcs','s3','azure') DEFAULT 'local',
+    cloud_bucket VARCHAR(255),
+    cloud_path VARCHAR(500),
+    upload_status ENUM('pending','uploading','uploaded','failed') DEFAULT 'pending',
     download_count INT DEFAULT 0,
     status ENUM('pending','approved','rejected') DEFAULT 'approved',
     upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
