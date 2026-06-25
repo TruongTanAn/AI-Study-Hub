@@ -1,0 +1,656 @@
+/* upload.css */
+:root {
+    --primary: #9333ea;
+    --primary-hover: #7e22ce;
+    --secondary: #ec4899;
+    --gradient-main: linear-gradient(135deg, #a855f7, #ec4899);
+    --dark: #0f172a;
+    --gray: #64748b;
+    --light-gray: #f8fafc;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --pdf-color: #ef4444;
+    --word-color: #3b82f6;
+    --txt-color: #64748b;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f1f5f9;
+}
+
+.upload-wrapper {
+    padding: 60px 20px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.upload-container {
+    width: 100%;
+    max-width: 850px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+}
+
+.upload-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.upload-header h2 {
+    font-size: 2.2rem;
+    color: var(--dark);
+    margin-bottom: 15px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.upload-header p {
+    color: var(--gray);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Tabs */
+.upload-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    background: #f1f5f9;
+    padding: 8px;
+    border-radius: 16px;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tab-btn {
+    padding: 12px 28px;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tab-btn:hover {
+    color: var(--dark);
+}
+
+.tab-btn.active {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Upload Sections */
+.upload-section {
+    display: none;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.upload-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Drag & Drop Area */
+.drop-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #f8fafc;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: var(--primary);
+    background: #faf5ff;
+}
+
+.drop-zone.dragover {
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    transition: transform 0.3s ease;
+}
+
+.drop-zone:hover .icon-circle {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.15);
+}
+
+.drop-zone-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.drop-zone-text {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.drop-zone-hint {
+    color: var(--gray);
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.supported-formats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+}
+
+.badge.pdf {
+    background: #fee2e2;
+    color: var(--pdf-color);
+}
+
+.badge.word {
+    background: #dbeafe;
+    color: var(--word-color);
+}
+
+.badge.txt {
+    background: #f1f5f9;
+    color: var(--txt-color);
+}
+
+.size-limit {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-left: 5px;
+}
+
+.file-input-hidden {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Selected File Display */
+.selected-file {
+    display: none;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+}
+
+.selected-file.active {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.file-info-container {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    flex: 1;
+}
+
+.file-icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.file-icon-box.pdf {
+    background: #fee2e2;
+    color: var(--pdf-color);
+}
+
+.file-icon-box.word {
+    background: #dbeafe;
+    color: var(--word-color);
+}
+
+.file-icon-box.txt {
+    background: #f1f5f9;
+    color: var(--txt-color);
+}
+
+.file-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.file-details h4 {
+    color: var(--dark);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    word-break: break-all;
+}
+
+.file-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.file-meta span {
+    color: var(--gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.pending {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.status-badge.uploading {
+    background: #dbeafe;
+    color: var(--primary);
+}
+
+.status-badge.error {
+    background: #fee2e2;
+    color: var(--error);
+}
+
+.status-badge.success {
+    background: #dcfce7;
+    color: var(--success);
+}
+
+.remove-file {
+    color: #94a3b8;
+    background: transparent;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.1rem;
+}
+
+.remove-file:hover {
+    background: #fee2e2;
+    color: var(--error);
+}
+
+/* Progress Bar */
+.progress-container {
+    width: 100%;
+    display: none;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--gradient-main);
+    width: 0%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 700;
+    display: block;
+    text-align: right;
+}
+
+/* Form Upload Area */
+.form-upload-area {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 1.05rem;
+}
+
+.form-label i {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+.form-label .optional {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.9rem;
+}
+
+.input-modern {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    color: #334155;
+    font-size: 1rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.input-modern:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.file-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 8px;
+    transition: all 0.3s;
+}
+
+.file-input-wrapper:hover {
+    border-color: #94a3b8;
+}
+
+.btn-choose-file {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-choose-file:hover {
+    background: #f1f5f9;
+}
+
+.file-name-display {
+    margin-left: 15px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-name-display.has-file {
+    color: var(--dark);
+    font-weight: 500;
+}
+
+.form-hints {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.form-progress {
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Buttons */
+.btn-upload {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    background: var(--gradient-main);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-upload.show {
+    display: inline-flex;
+}
+
+#form-section .btn-upload {
+    display: inline-flex;
+    /* always visible in form section */
+}
+
+.btn-upload:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.4);
+}
+
+.btn-upload[disabled] {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.alert i {
+    font-size: 1.2rem;
+}
+
+.upload-custom-header {
+    width: 100%;
+    background: linear-gradient(90deg, #9333ea, #ec4899);
+    /* Tím sang Hồng */
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.upload-custom-header .logo .logo-link {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-custom-header .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.upload-custom-header .header-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.upload-custom-header .header-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+.upload-custom-header .header-btn.logout {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.upload-custom-header .header-btn.logout:hover {
+    background: rgba(239, 68, 68, 0.85);
+    /* Hiệu ứng đỏ khi di chuột vào nút Đăng xuất */
+}
+
+/* 2. Đè màu các thành phần Upload theo hệ màu mới (Override biến :root cũ) */
+.tab-btn.active {
+    color: #9333ea !important;
+    /* Chữ active màu tím */
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: #9333ea !important;
+    background: #faf5ff !important;
+    /* Nền hover tím cực nhẹ */
+}
+
+.drop-zone-icon {
+    color: #9333ea !important;
+}
