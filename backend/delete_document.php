@@ -17,19 +17,21 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo json_encode([
-            'success' => false,
-            'error' => 'Phương thức không được hỗ trợ'
-        ]);
-        exit;
-    }
-    
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Phương thức không được hỗ trợ'
+    ]);
+    exit;
+}
+
+$documentId = 0;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $documentId = isset($_POST['document_id']) ? intval($_POST['document_id']) : 0;
+} else {
     $input = json_decode(file_get_contents('php://input'), true);
     $documentId = isset($input['document_id']) ? intval($input['document_id']) : 0;
-} else {
-    $documentId = isset($_POST['document_id']) ? intval($_POST['document_id']) : 0;
 }
 
 if ($documentId <= 0) {

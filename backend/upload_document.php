@@ -1,6 +1,8 @@
 <?php
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -8,116 +10,121 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Max-Age: 86400');
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/cloud_storage.php';
-require_once __DIR__ . '/validate_file.php';
-require_once __DIR__ . '/save_document.php';
-require_once __DIR__ . '/save_cloud_url.php';
-require_once __DIR__ . '/upload_status.php';
-
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Vui lòng đăng nhập để tải lên tài liệu'
-    ]);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Phương thức không được hỗ trợ'
-    ]);
+function returnJson($success, $message = '', $error = '', $extra = []) {
+    $response = ['success' => $success];
+    if ($message) $response['message'] = $message;
+    if ($error) $response['error'] = $error;
+    $response = array_merge($response, $extra);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+if (!isset($_SESSION['user_id'])) {
+    returnJson(false, '', 'Vui lòng đăng nhập để tải lên tài liệu');
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    returnJson(false, '', 'Phương thức không được hỗ trợ');
 }
 
 $userId = $_SESSION['user_id'];
 $title = isset($_POST['title']) ? trim($_POST['title']) : '';
 $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+$visibility = isset($_POST['visibility']) ? trim($_POST['visibility']) : 'public';
+$status = 'pending';
 
 if (empty($title)) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Tiêu đề tài liệu không được để trống'
-    ]);
-    exit;
+    returnJson(false, '', 'Tiêu đề tài liệu không được để trống');
 }
 
 if (strlen($title) > 255) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Tiêu đề quá dài (tối đa 255 ký tự)'
-    ]);
-    exit;
+    returnJson(false, '', 'Tiêu đề quá dài (tối đa 255 ký tự)');
 }
 
-if (!isset($_FILES['document']) || empty($_FILES['document']['name'])) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Vui lòng chọn file để tải lên'
-    ]);
-    exit;
+$fileInputName = 'file';
+if (!isset($_FILES[$fileInputName]) || empty($_FILES[$fileInputName]['name'])) {
+    returnJson(false, '', 'Vui lòng chọn file để tải lên');
 }
 
-$file = $_FILES['document'];
+$file = $_FILES[$fileInputName];
 
-$validation = FileValidator::validate($file);
-
-if (!$validation['valid']) {
-    echo json_encode([
-        'success' => false,
-        'error' => implode('. ', $validation['errors']),
-        'errors' => $validation['errors']
-    ]);
-    exit;
+if ($file['error'] !== UPLOAD_ERR_OK) {
+    $uploadErrors = [
+        UPLOAD_ERR_INI_SIZE => 'File vượt quá giới hạn upload của server',
+        UPLOAD_ERR_FORM_SIZE => 'File vượt quá giới hạn upload của form',
+        UPLOAD_ERR_PARTIAL => 'File chỉ được upload một phần',
+        UPLOAD_ERR_NO_FILE => 'Không có file nào được upload',
+        UPLOAD_ERR_NO_TMP_DIR => 'Thiếu thư mục tạm để lưu file',
+        UPLOAD_ERR_CANT_WRITE => 'Không thể ghi file vào đĩa',
+        UPLOAD_ERR_EXTENSION => 'Upload bị dừng bởi extension PHP'
+    ];
+    $errorMsg = $uploadErrors[$file['error']] ?? 'Lỗi upload không xác định';
+    returnJson(false, '', $errorMsg);
 }
 
-$originalName = FileValidator::sanitizeFilename($file['name']);
-$secureFilename = FileValidator::generateSecureFilename($originalName, $userId);
+$extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+$allowedExtensions = ['pdf', 'docx', 'pptx'];
+
+if (!in_array($extension, $allowedExtensions)) {
+    returnJson(false, '', 'Chỉ cho phép upload file PDF, DOCX, PPTX');
+}
+
+if ($file['size'] <= 0) {
+    returnJson(false, '', 'File rỗng hoặc không hợp lệ');
+}
+
+if ($file['size'] > 50 * 1024 * 1024) {
+    returnJson(false, '', 'File vượt quá kích thước cho phép (50MB)');
+}
+
+$originalName = preg_replace('/[^\w\-\.]/', '_', $file['name']);
+$originalName = preg_replace('/_+/', '_', $originalName);
+$originalName = trim($originalName, '_');
+
+$timestamp = time();
+$randomString = bin2hex(random_bytes(8));
+$secureFilename = 'user_' . $userId . '_' . $timestamp . '_' . $randomString . '.' . $extension;
 
 $uploadDir = __DIR__ . '/../uploads/documents/';
 
 if (!file_exists($uploadDir)) {
     if (!mkdir($uploadDir, 0755, true)) {
-        echo json_encode([
-            'success' => false,
-            'error' => 'Không thể tạo thư mục lưu trữ'
-        ]);
-        exit;
+        returnJson(false, '', 'Không thể tạo thư mục lưu trữ');
     }
 }
 
 if (!is_writable($uploadDir)) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Thư mục lưu trữ không có quyền ghi'
-    ]);
-    exit;
+    returnJson(false, '', 'Thư mục lưu trữ không có quyền ghi');
 }
 
 $targetPath = $uploadDir . $secureFilename;
 
 if (file_exists($targetPath)) {
-    $secureFilename = FileValidator::generateSecureFilename($originalName, $userId . '_retry_' . time());
+    $secureFilename = 'user_' . $userId . '_retry_' . time() . '_' . $randomString . '.' . $extension;
     $targetPath = $uploadDir . $secureFilename;
 }
 
-$result = CloudStorage::upload($file['tmp_name'], $secureFilename, 'documents');
-
-if (!$result['success']) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Không thể tải file lên: ' . $result['error']
-    ]);
-    exit;
+if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+    returnJson(false, '', 'Không thể di chuyển file đến thư mục upload');
 }
 
-$localPath = $result['path'] ?? $uploadDir . $secureFilename;
-$cloudUrl = $result['url'] ?? null;
-$cloudProvider = CloudStorage::getConfig()['provider'];
+chmod($targetPath, 0644);
+
+try {
+    require_once __DIR__ . '/../config/database.php';
+} catch (Exception $e) {
+    if (file_exists($targetPath)) @unlink($targetPath);
+    returnJson(false, '', 'Lỗi kết nối database: ' . $e->getMessage());
+}
 
 $documentData = [
     'user_id' => $userId,
@@ -125,218 +132,45 @@ $documentData = [
     'description' => $description,
     'file_name' => $secureFilename,
     'original_name' => $originalName,
-    'file_path' => $localPath,
-    'file_type' => $validation['file_type'],
-    'mime_type' => $validation['mime_type'],
-    'file_size' => $file['size']
+    'file_path' => $targetPath,
+    'file_type' => strtoupper($extension),
+    'file_size' => $file['size'],
+    'visibility' => $visibility,
+    'status' => $status
 ];
 
 if (isset($_POST['category_id']) && !empty($_POST['category_id'])) {
     $documentData['category_id'] = intval($_POST['category_id']);
 }
 
+require_once __DIR__ . '/save_document.php';
+
 $saveResult = saveDocumentToDatabase($documentData);
 
 if (!$saveResult['success']) {
-    if (file_exists($targetPath)) {
-        unlink($targetPath);
-    }
-
-    echo json_encode([
-        'success' => false,
-        'error' => 'Không thể lưu thông tin tài liệu: ' . $saveResult['error']
-    ]);
-    exit;
+    if (file_exists($targetPath)) @unlink($targetPath);
+    returnJson(false, '', 'Không thể lưu thông tin tài liệu: ' . $saveResult['error']);
 }
 
 $documentId = $saveResult['document_id'];
+$fileSizeFormatted = formatFileSize($file['size']);
 
-if ($cloudUrl !== null) {
-    $cloudData = [
-        'url' => $cloudUrl,
-        'path' => $result['path'] ?? $secureFilename,
-        'provider' => $cloudProvider,
-        'bucket' => $result['bucket'] ?? null
-    ];
-
-    $cloudResult = saveCloudUrl($documentId, $cloudData);
-
-    if ($cloudResult['success']) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Tải lên tài liệu thành công',
-            'document_id' => $documentId,
-            'cloud_url' => $cloudUrl,
-            'file' => [
-                'name' => $originalName,
-                'type' => $validation['file_type'],
-                'size' => $file['size'],
-                'size_formatted' => formatFileSize($file['size'])
-            ]
-        ]);
-    } else {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Tải lên tài liệu thành công (Cloud URL chưa được lưu)',
-            'document_id' => $documentId,
-            'file' => [
-                'name' => $originalName,
-                'type' => $validation['file_type'],
-                'size' => $file['size'],
-                'size_formatted' => formatFileSize($file['size'])
-            ]
-        ]);
-    }
-} else {
-    echo json_encode([
-        'success' => true,
-        'message' => 'Tải lên tài liệu thành công',
-        'document_id' => $documentId,
-        'file' => [
-            'name' => $originalName,
-            'type' => $validation['file_type'],
-            'size' => $file['size'],
-            'size_formatted' => formatFileSize($file['size'])
-        ]
-    ]);
-}
+returnJson(true, 'Tải lên tài liệu thành công', '', [
+    'document_id' => $documentId,
+    'file' => [
+        'name' => $originalName,
+        'type' => strtoupper($extension),
+        'size' => $file['size'],
+        'size_formatted' => $fileSizeFormatted
+    ]
+]);
 
 function formatFileSize($bytes) {
     $units = ['B', 'KB', 'MB', 'GB'];
     $unitIndex = 0;
-
     while ($bytes >= 1024 && $unitIndex < count($units) - 1) {
         $bytes /= 1024;
         $unitIndex++;
     }
-
     return round($bytes, 2) . ' ' . $units[$unitIndex];
 }
-=======
-session_start();
-require_once '../includes/auth_check.php';
-
-// Check if request is POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check if file was uploaded without errors
-    if (isset($_FILES['document']) && $_FILES['document']['error'] === UPLOAD_ERR_OK) {
-        
-        $fileTmpPath = $_FILES['document']['tmp_name'];
-        $fileName = $_FILES['document']['name'];
-        $fileSize = $_FILES['document']['size'];
-        $fileType = $_FILES['document']['type'];
-        
-        // Define allowed extensions
-        $allowedExts = ['pdf', 'doc', 'docx', 'txt'];
-        
-        // Get file extension
-        $fileNameCmps = explode(".", $fileName);
-        $fileExtension = strtolower(end($fileNameCmps));
-
-        // Check if extension is allowed
-        if (in_array($fileExtension, $allowedExts)) {
-            
-            // Limit file size to 10MB
-            if ($fileSize < (10 * 1024 * 1024)) {
-                
-                // Set upload directory
-                $uploadFileDir = '../uploads/';
-                
-                // Create directory if not exists
-                if (!is_dir($uploadFileDir)) {
-                    mkdir($uploadFileDir, 0755, true);
-                }
-                
-                // Rename file to prevent duplicates
-                $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
-                $dest_path = $uploadFileDir . $newFileName;
-                
-                // Move file to destination
-                if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                    // Success, redirect back with success message
-                    $message = urlencode("Tài liệu đã được tải lên thành công!");
-                    header("Location: ../pages/upload.php?success=" . $message);
-                    exit();
-                } else {
-                    $error = urlencode("Đã có lỗi xảy ra khi di chuyển file tải lên.");
-                }
-            } else {
-                $error = urlencode("Kích thước file vượt quá 10MB.");
-            }
-        } else {
-            $error = urlencode("Định dạng file không được hỗ trợ. Vui lòng tải lên PDF, DOC, DOCX hoặc TXT.");
-        }
-    } else {
-        $error = urlencode("Lỗi khi tải file lên hoặc bạn chưa chọn file.");
-    }
-} else {
-    $error = urlencode("Yêu cầu không hợp lệ.");
-}
-
-// Redirect back with error
-header("Location: ../pages/upload.php?error=" . $error);
-exit();
-?>
->>>>>>> origin/hoa-fe
-=======
-
-// FE phải gửi:
-// <input type="file" name="document">
-
-session_start();
-include "../config/database.php";
-include "validate_file.php";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    if (!isset($_SESSION["user_id"])) {
-        die("Vui lòng đăng nhập");
-    }
-
-    $file = $_FILES["document"];
-
-    // Kiểm tra lỗi upload
-
-    if ($file["error"] !== 0) {
-        die("Upload lỗi");
-    }
-
-    // Đổi tên file tránh trùng
-
-    $fileName =
-        time() . "_" .
-        basename($file["name"]);
-
-    // Đường dẫn lưu file
-
-    $targetPath =
-        "../uploads/" . $fileName;
-
-    // Upload file
-
-    if (
-        move_uploaded_file(
-            $file["tmp_name"],
-            $targetPath
-        )
-    ) {
-
-        echo json_encode([
-            "success" => true,
-            "message" => "Upload thành công",
-            "file_name" => $fileName
-        ]);
-
-    } else {
-
-        echo json_encode([
-            "success" => false,
-            "message" => "Upload thất bại"
-        ]);
-
-    }
-
-}
-
-?>
->>>>>>> origin/kietle-be

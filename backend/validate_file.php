@@ -1,41 +1,13 @@
 <?php
 
-<<<<<<< HEAD
 class FileValidator {
     private static $allowedExtensions = ['pdf', 'docx', 'pptx'];
-    private static $allowedMimeTypes = [
-        'pdf' => [
-            'application/pdf'
-        ],
-        'docx' => [
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/msword'
-        ],
-        'pptx' => [
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'application/vnd.ms-powerpoint'
-        ]
-    ];
 
     private static $dangerousExtensions = [
         'php', 'php3', 'php4', 'php5', 'php7', 'phtml', 'phar',
         'asp', 'aspx', 'cer', 'cgi', 'pl', 'py', 'jsp', 'jspx',
         'exe', 'bat', 'cmd', 'sh', 'bash', 'shell', 'scr', 'vbs',
         'js', 'jar', 'war', 'sql', 'htaccess', 'ini'
-    ];
-
-    private static $dangerousMimeTypes = [
-        'application/x-php',
-        'text/x-php',
-        'application/x-httpd-php',
-        'application/x-sh',
-        'application/x-shellscript',
-        'text/x-shellscript',
-        'application/x-executable',
-        'application/x-msdownload',
-        'application/x-msdos-program',
-        'application/x-winexe',
-        'text/javascript'
     ];
 
     public static function validate($file) {
@@ -101,30 +73,20 @@ class FileValidator {
             return $result;
         }
 
-        $allowedMimes = self::$allowedMimeTypes[$extension] ?? [];
+        $allowedMimes = self::getAllowedMimes($extension);
         if (!in_array($mimeType, $allowedMimes)) {
             $result['valid'] = false;
             $result['errors'][] = 'MIME type không hợp lệ cho định dạng ' . strtoupper($extension);
             return $result;
         }
 
-        if (in_array($mimeType, self::$dangerousMimeTypes)) {
-            $result['valid'] = false;
-            $result['errors'][] = 'Loại file này không được phép upload';
-            return $result;
-        }
-
-        $finfo = finfo_open(FILEINFO_MACHINE);
-        $fileContent = file_get_contents($file['tmp_name'], false, null, 0, 8192);
+        $fileContent = @file_get_contents($file['tmp_name'], false, null, 0, 8192);
 
         if ($fileContent !== false) {
             if (preg_match('/<\?php/i', $fileContent)) {
                 $result['valid'] = false;
                 $result['errors'][] = 'File chứa mã PHP không được phép upload';
                 return $result;
-            }
-
-            if (preg_match('/<script/i', $fileContent) && $extension === 'pdf') {
             }
 
             if (preg_match('/#!\/bin\/(ba)?sh/i', $fileContent)) {
@@ -141,6 +103,21 @@ class FileValidator {
         return $result;
     }
 
+    private static function getAllowedMimes($extension) {
+        $mimes = [
+            'pdf' => ['application/pdf'],
+            'docx' => [
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/msword'
+            ],
+            'pptx' => [
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.ms-powerpoint'
+            ]
+        ];
+        return $mimes[$extension] ?? [];
+    }
+
     private static function getMimeType($filePath) {
         if (!file_exists($filePath)) {
             return false;
@@ -150,7 +127,7 @@ class FileValidator {
         $mimeType = finfo_file($finfo, $filePath);
         finfo_close($finfo);
 
-        return $mimeType;
+        return $mimeType ?: false;
     }
 
     private static function getUploadError($errorCode) {
@@ -187,29 +164,3 @@ class FileValidator {
         return $filename;
     }
 }
-=======
-if (!isset($_FILES["document"])) {
-    die("Chưa chọn file");
-}
-
-$fileType = strtolower(
-    pathinfo(
-        $_FILES["document"]["name"],
-        PATHINFO_EXTENSION
-    )
-);
-
-$allowedTypes = ["pdf", "docx", "pptx"];
-
-if (!in_array($fileType, $allowedTypes)) {
-    die("Chỉ cho phép PDF, DOCX, PPTX");
-}
-
-$maxSize = 10 * 1024 * 1024;
-
-if ($_FILES["document"]["size"] > $maxSize) {
-    die("File vượt quá 10MB");
-}
-
-?>
->>>>>>> origin/kietle-be

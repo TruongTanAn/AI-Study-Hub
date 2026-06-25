@@ -1,4 +1,4 @@
-CREATE DATABASE ai_study_hub;
+CREATE DATABASE IF NOT EXISTS ai_study_hub;
 USE ai_study_hub;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -18,27 +18,31 @@ CREATE TABLE IF NOT EXISTS categories (
     category_name VARCHAR(100) NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS subjects (
+    subject_id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS documents (
     document_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    subject_id INT,
+    category_id INT,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     file_name VARCHAR(255) NOT NULL,
     original_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(500) NOT NULL,
-    cloud_url VARCHAR(500),
     file_type VARCHAR(50) NOT NULL,
-    mime_type VARCHAR(100) NOT NULL,
     file_size BIGINT NOT NULL,
-    cloud_provider ENUM('local','gcs','s3','azure') DEFAULT 'local',
-    cloud_bucket VARCHAR(255),
-    cloud_path VARCHAR(500),
-    upload_status ENUM('pending','uploading','uploaded','failed') DEFAULT 'pending',
-    download_count INT DEFAULT 0,
-    status ENUM('pending','approved','rejected') DEFAULT 'approved',
-    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    visibility ENUM('public','private','shared') DEFAULT 'public',
+    downloads_count INT DEFAULT 0,
+    status ENUM('pending','approved','rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS document_categories (
@@ -82,3 +86,21 @@ CREATE TABLE IF NOT EXISTS password_resets (
     expires_at DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+INSERT IGNORE INTO categories (category_name) VALUES 
+    ('Toán học'),
+    ('Vật lý'),
+    ('Hóa học'),
+    ('Lập trình'),
+    ('Ngoại ngữ'),
+    ('Kinh tế'),
+    ('Khác');
+
+INSERT IGNORE INTO subjects (subject_name) VALUES 
+    ('Khoa học tự nhiên'),
+    ('Khoa học xã hội'),
+    ('Công nghệ thông tin'),
+    ('Kinh doanh'),
+    ('Nghệ thuật'),
+    ('Sức khỏe'),
+    ('Khác');

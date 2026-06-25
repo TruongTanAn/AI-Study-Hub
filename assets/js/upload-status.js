@@ -87,9 +87,11 @@
             if (xhr.readyState !== 4) return;
 
             if (xhr.status === 200) {
-                handleServerResponse(xhr.responseText);
+                handleServerResponse(xhr.responseText, xhr.status);
+            } else if (xhr.status === 0) {
+                handleUploadError('Không thể kết nối tới server. Có thể do lỗi mạng hoặc server không phản hồi.');
             } else {
-                handleUploadError('Upload thất bại. Vui lòng thử lại. (Lỗi HTTP ' + xhr.status + ')');
+                handleServerResponse(xhr.responseText, xhr.status);
             }
         };
 
@@ -104,13 +106,15 @@
         updateStatusText('uploading');
     }
 
-    function handleServerResponse(responseText) {
+    function handleServerResponse(responseText, statusCode) {
         var response;
 
         try {
             response = JSON.parse(responseText);
         } catch (e) {
-            handleUploadError('Phản hồi từ server không hợp lệ. Vui lòng thử lại.');
+            console.error('Invalid JSON Response:', responseText);
+            console.error('Parse Error:', e);
+            handleUploadError('Phản hồi từ server không hợp lệ. Vui lòng thử lại. (Status: ' + statusCode + ')');
             return;
         }
 
@@ -119,14 +123,15 @@
             updateStatusText('completed');
 
             setTimeout(function () {
-                showResultMessage(true, 'Upload tài liệu thành công!');
+                showResultMessage(true, response.message || 'Upload tài liệu thành công!');
                 hideProgressContainerAfterDelay(1500);
                 resetForm();
             }, 400);
         } else {
-            var errorMessage = (response.message && response.message.trim())
-                ? response.message
-                : 'Upload thất bại. Vui lòng thử lại.';
+            var errorMessage = (response.error || response.message || '').trim();
+            if (!errorMessage) {
+                errorMessage = 'Upload thất bại. Vui lòng thử lại.';
+            }
             handleUploadError(errorMessage);
         }
     }
@@ -185,7 +190,7 @@
 
         resultMessageEl.className = 'upload-result-message';
 
-        var iconSymbol = isSuccess ? '✔' : '✖';
+        var iconSymbol = isSuccess ? '\u2714' : '\u2716';
         var alertClass = isSuccess ? 'alert-success' : 'alert-error';
 
         resultMessageEl.classList.add(alertClass);
