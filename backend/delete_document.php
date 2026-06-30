@@ -68,6 +68,7 @@ if ($document['user_id'] !== $userId && $userRole !== 'admin') {
     exit;
 }
 
-$result = deleteDocument($documentId, $userId);
+$result = deleteDocument($documentId, $userRole === 'admin' ? null : $userId);
 
 echo json_encode($result);
+?>
