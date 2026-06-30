@@ -5,17 +5,17 @@ include "../config/database.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
-    $keyword = trim($_GET["q"] ?? "");
+    $categoryId = $_GET["category_id"] ?? 0;
 
     $stmt = $conn->prepare("
-        SELECT *
-        FROM documents
-        WHERE title LIKE ?
+        SELECT d.*
+        FROM documents d
+        JOIN document_categories dc
+        ON d.document_id = dc.document_id
+        WHERE dc.category_id = ?
     ");
 
-    $search = "%" . $keyword . "%";
-
-    $stmt->bind_param("s", $search);
+    $stmt->bind_param("i", $categoryId);
     $stmt->execute();
 
     $result = $stmt->get_result();
