@@ -1,74 +1,54 @@
 <?php
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/save_document.php';
-
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Vui lòng đăng nhập'
-    ]);
+    echo json_encode(['success' => false, 'error' => 'Vui long dang nhap'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Phương thức không được hỗ trợ'
-    ]);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'error' => 'Phuong thuc khong duoc ho tro'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-$documentId = 0;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $documentId = isset($_POST['document_id']) ? intval($_POST['document_id']) : 0;
-} else {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $documentId = isset($input['document_id']) ? intval($input['document_id']) : 0;
-}
+$documentId = isset($_POST['document_id']) ? intval($_POST['document_id']) : 0;
 
 if ($documentId <= 0) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'ID tài liệu không hợp lệ'
-    ]);
+    echo json_encode(['success' => false, 'error' => 'ID tai lieu khong hop le'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 $userId = $_SESSION['user_id'];
-$userRole = isset($_SESSION['role']) ? $_SESSION['role'] : 'user';
+$userRole = $_SESSION['role'] ?? 'user';
 
-$checkStmt = $conn->prepare("SELECT user_id FROM documents WHERE document_id = ?");
-$checkStmt->bind_param("i", $documentId);
+$checkStmt = $conn->prepare('SELECT user_id FROM documents WHERE document_id = ?');
+$checkStmt->bind_param('i', $documentId);
 $checkStmt->execute();
 $checkResult = $checkStmt->get_result();
 
 if ($checkResult->num_rows === 0) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Tài liệu không tồn tại'
-    ]);
+    echo json_encode(['success' => false, 'error' => 'Tai lieu khong ton tai'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 $document = $checkResult->fetch_assoc();
 
 if ($document['user_id'] !== $userId && $userRole !== 'admin') {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Bạn không có quyền xóa tài liệu này'
-    ]);
+    echo json_encode(['success' => false, 'error' => 'Ban khong co quyen xoa tai lieu nay'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-$result = deleteDocument($documentId, $userRole === 'admin' ? null : $userId);
+$deleteStmt = $conn->prepare('DELETE FROM documents WHERE document_id = ?');
+$deleteStmt->bind_param('i', $documentId);
 
-echo json_encode($result);
-?>
+if ($deleteStmt->execute()) {
+    echo json_encode(['success' => true, 'message' => 'Xoa tai lieu thanh cong'], JSON_UNESCAPED_UNICODE);
+} else {
+    echo json_encode(['success' => false, 'error' => 'Khong the xoa tai lieu'], JSON_UNESCAPED_UNICODE);
+}
+
+$deleteStmt->close();
+$conn->close();

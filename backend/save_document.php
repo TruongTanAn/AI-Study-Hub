@@ -1,10 +1,8 @@
 <?php
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+require_once __DIR__ . '/../includes/utf8_helper.php';
 require_once __DIR__ . '/../config/database.php';
+
+header('Content-Type: application/json; charset=utf-8');
 
 function saveDocumentToDatabase($data) {
     global $conn;
@@ -15,16 +13,16 @@ function saveDocumentToDatabase($data) {
         if (!isset($data[$field]) || $data[$field] === '') {
             return [
                 'success' => false,
-                'error' => 'Thiếu thông tin bắt buộc: ' . $field
+                'error' => 'Thieu thong tin bat buoc: ' . $field
             ];
         }
     }
 
     $userId = intval($data['user_id']);
-    $title = trim($data['title']);
-    $description = isset($data['description']) ? trim($data['description']) : '';
-    $fileName = trim($data['file_name']);
-    $originalName = isset($data['original_name']) ? trim($data['original_name']) : $fileName;
+    $title = to_utf8(trim($data['title']));
+    $description = to_utf8(isset($data['description']) ? trim($data['description']) : '');
+    $fileName = to_utf8(trim($data['file_name']));
+    $originalName = to_utf8(isset($data['original_name']) ? trim($data['original_name']) : $fileName);
     $filePath = trim($data['file_path']);
     $fileType = trim($data['file_type']);
     $fileSize = intval($data['file_size']);
@@ -33,7 +31,7 @@ function saveDocumentToDatabase($data) {
     if (!$checkUser) {
         return [
             'success' => false,
-            'error' => 'Prepare failed: ' . $conn->error
+            'error' => 'Prepare that bai: ' . $conn->error
         ];
     }
     $checkUser->bind_param("i", $userId);
@@ -44,7 +42,7 @@ function saveDocumentToDatabase($data) {
         $checkUser->close();
         return [
             'success' => false,
-            'error' => 'Người dùng không tồn tại'
+            'error' => 'Nguoi dung khong ton tai'
         ];
     }
     $checkUser->close();
@@ -63,7 +61,7 @@ function saveDocumentToDatabase($data) {
     if (!$stmt) {
         return [
             'success' => false,
-            'error' => 'Prepare INSERT failed: ' . $conn->error
+            'error' => 'Prepare INSERT that bai: ' . $conn->error
         ];
     }
 
@@ -78,7 +76,7 @@ function saveDocumentToDatabase($data) {
         $stmt->close();
         return [
             'success' => false,
-            'error' => 'Execute INSERT failed: ' . $error
+            'error' => 'Execute INSERT that bai: ' . $error
         ];
     }
 
@@ -88,7 +86,7 @@ function saveDocumentToDatabase($data) {
     return [
         'success' => true,
         'document_id' => $documentId,
-        'message' => 'Lưu document thành công'
+        'message' => 'Luu tai lieu thanh cong'
     ];
 }
 
@@ -101,20 +99,16 @@ function updateDocumentStatus($documentId, $status) {
     if (!in_array($status, ['pending', 'approved', 'rejected'])) {
         return [
             'success' => false,
-            'error' => 'Trạng thái không hợp lệ'
+            'error' => 'Trang thai khong hop le'
         ];
     }
 
-    $stmt = $conn->prepare("
-        UPDATE documents
-        SET status = ?
-        WHERE document_id = ?
-    ");
+    $stmt = $conn->prepare("UPDATE documents SET status = ? WHERE document_id = ?");
 
     if (!$stmt) {
         return [
             'success' => false,
-            'error' => 'Prepare UPDATE failed: ' . $conn->error
+            'error' => 'Prepare UPDATE that bai: ' . $conn->error
         ];
     }
 
@@ -125,14 +119,14 @@ function updateDocumentStatus($documentId, $status) {
         $stmt->close();
         return [
             'success' => false,
-            'error' => 'Execute UPDATE failed: ' . $error
+            'error' => 'Execute UPDATE that bai: ' . $error
         ];
     }
 
     $stmt->close();
     return [
         'success' => true,
-        'message' => 'Cập nhật trạng thái thành công'
+        'message' => 'Cap nhat trang thai thanh cong'
     ];
 }
 
@@ -159,6 +153,12 @@ function getDocumentById($documentId) {
 
     if ($result->num_rows > 0) {
         $data = $result->fetch_assoc();
+        // FIX: Force UTF-8 on DB strings
+        if ($data) {
+            $data['title'] = to_utf8($data['title']);
+            $data['description'] = to_utf8($data['description'] ?? '');
+            $data['uploader_name'] = to_utf8($data['uploader_name']);
+        }
         $stmt->close();
         return $data;
     }
@@ -209,6 +209,11 @@ function getUserDocuments($userId, $status = null) {
 
     $documents = [];
     while ($row = $result->fetch_assoc()) {
+        // FIX: Force UTF-8
+        $row['title'] = to_utf8($row['title']);
+        $row['description'] = to_utf8($row['description'] ?? '');
+        $row['file_name'] = to_utf8($row['file_name']);
+        $row['original_name'] = to_utf8($row['original_name']);
         $documents[] = $row;
     }
 
@@ -228,7 +233,7 @@ function deleteDocument($documentId, $userId = null) {
         if (!$checkStmt) {
             return [
                 'success' => false,
-                'error' => 'Prepare SELECT failed: ' . $conn->error
+                'error' => 'Prepare SELECT that bai: ' . $conn->error
             ];
         }
 
@@ -239,7 +244,7 @@ function deleteDocument($documentId, $userId = null) {
         if (!$checkStmt) {
             return [
                 'success' => false,
-                'error' => 'Prepare SELECT failed: ' . $conn->error
+                'error' => 'Prepare SELECT that bai: ' . $conn->error
             ];
         }
 
@@ -253,7 +258,7 @@ function deleteDocument($documentId, $userId = null) {
         $checkStmt->close();
         return [
             'success' => false,
-            'error' => 'Document không tồn tại hoặc bạn không có quyền xóa'
+            'error' => 'Tai lieu khong ton tai hoac ban khong co quyen xoa'
         ];
     }
 
@@ -265,7 +270,7 @@ function deleteDocument($documentId, $userId = null) {
     if (!$deleteDoc) {
         return [
             'success' => false,
-            'error' => 'Prepare DELETE failed: ' . $conn->error
+            'error' => 'Prepare DELETE that bai: ' . $conn->error
         ];
     }
 
@@ -280,7 +285,7 @@ function deleteDocument($documentId, $userId = null) {
 
         return [
             'success' => true,
-            'message' => 'Xóa document thành công'
+            'message' => 'Xoa tai lieu thanh cong'
         ];
     }
 
@@ -288,7 +293,7 @@ function deleteDocument($documentId, $userId = null) {
     $deleteDoc->close();
     return [
         'success' => false,
-        'error' => 'Không thể xóa document: ' . $error
+        'error' => 'Khong the xoa tai lieu: ' . $error
     ];
 }
 
@@ -297,11 +302,7 @@ function incrementDownloadCount($documentId) {
 
     $documentId = intval($documentId);
 
-    $stmt = $conn->prepare("
-        UPDATE documents
-        SET downloads_count = downloads_count + 1
-        WHERE document_id = ?
-    ");
+    $stmt = $conn->prepare("UPDATE documents SET downloads_count = downloads_count + 1 WHERE document_id = ?");
 
     if (!$stmt) {
         return false;
@@ -329,7 +330,7 @@ function updateDocument($documentId, $userId, $data) {
         $checkStmt->close();
         return [
             'success' => false,
-            'error' => 'Tài liệu không tồn tại'
+            'error' => 'Tai lieu khong ton tai'
         ];
     }
 
@@ -340,13 +341,13 @@ function updateDocument($documentId, $userId, $data) {
         $checkStmt->close();
         return [
             'success' => false,
-            'error' => 'Bạn không có quyền chỉnh sửa tài liệu này'
+            'error' => 'Ban khong co quyen chinh sua tai lieu nay'
         ];
     }
     $checkStmt->close();
 
-    $title = isset($data['title']) ? trim($data['title']) : '';
-    $description = isset($data['description']) ? trim($data['description']) : '';
+    $title = isset($data['title']) ? to_utf8(trim($data['title'])) : '';
+    $description = isset($data['description']) ? to_utf8(trim($data['description'])) : '';
     $visibility = isset($data['visibility']) ? trim($data['visibility']) : 'public';
     $categoryId = isset($data['category_id']) && !empty($data['category_id']) ? intval($data['category_id']) : null;
     $subjectId = isset($data['subject_id']) && !empty($data['subject_id']) ? intval($data['subject_id']) : null;
@@ -354,14 +355,14 @@ function updateDocument($documentId, $userId, $data) {
     if (empty($title)) {
         return [
             'success' => false,
-            'error' => 'Tiêu đề không được để trống'
+            'error' => 'Tieu de khong duoc de trong'
         ];
     }
 
-    if (strlen($title) > 255) {
+    if (mb_strlen($title) > 255) {
         return [
             'success' => false,
-            'error' => 'Tiêu đề quá dài (tối đa 255 ký tự)'
+            'error' => 'Tieu de qua dai (toi da 255 ky tu)'
         ];
     }
 
@@ -369,7 +370,7 @@ function updateDocument($documentId, $userId, $data) {
     if (!in_array($visibility, $validVisibilities)) {
         return [
             'success' => false,
-            'error' => 'Chế độ hiển thị không hợp lệ'
+            'error' => 'Che do hien thi khong hop le'
         ];
     }
 
@@ -401,7 +402,7 @@ function updateDocument($documentId, $userId, $data) {
     if (!$stmt) {
         return [
             'success' => false,
-            'error' => 'Prepare UPDATE failed: ' . $conn->error
+            'error' => 'Prepare UPDATE that bai: ' . $conn->error
         ];
     }
 
@@ -412,7 +413,7 @@ function updateDocument($documentId, $userId, $data) {
         $stmt->close();
         return [
             'success' => false,
-            'error' => 'Execute UPDATE failed: ' . $error
+            'error' => 'Execute UPDATE that bai: ' . $error
         ];
     }
 
@@ -420,7 +421,7 @@ function updateDocument($documentId, $userId, $data) {
 
     return [
         'success' => true,
-        'message' => 'Cập nhật tài liệu thành công',
+        'message' => 'Cap nhat tai lieu thanh cong',
         'document_id' => $documentId
     ];
 }

@@ -444,7 +444,7 @@ $fileType = strtoupper($doc['file_type']);
             <i class="fas fa-brain"></i> AI Study Hub
         </a>
         <div class="header-actions">
-            <span class="user-greeting">Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong></span>
+            <span class="user-greeting">Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name'], ENT_QUOTES, 'UTF-8'); ?></strong></span>
             <a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a>
             <a href="documents.php"><i class="fas fa-folder-open"></i> Tài liệu của tôi</a>
             <a href="upload.php" class="btn-upload-nav"><i class="fas fa-upload"></i> Upload</a>
@@ -475,7 +475,7 @@ $fileType = strtoupper($doc['file_type']);
                     <i class="fas <?php echo $fileType === 'PDF' ? 'fa-file-pdf' : ($fileType === 'DOCX' ? 'fa-file-word' : 'fa-file-powerpoint'); ?>"></i>
                 </div>
                 <div class="file-details-text">
-                    <span class="filename"><?php echo htmlspecialchars($doc['original_name']); ?></span>
+                    <span class="filename"><?php echo htmlspecialchars($doc['original_name'], ENT_QUOTES, 'UTF-8'); ?></span>
                     <span class="meta">Định dạng: <?php echo $fileType; ?> | Kích thước: <?php echo round($doc['file_size'] / (1024 * 1024), 2); ?> MB</span>
                 </div>
             </div>
@@ -500,7 +500,7 @@ $fileType = strtoupper($doc['file_type']);
                         name="title"
                         class="form-control"
                         placeholder="Nhập tiêu đề tài liệu..."
-                        value="<?php echo htmlspecialchars($doc['title']); ?>"
+                        value="<?php echo htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8'); ?>"
                         required
                     >
                 </div>
@@ -513,7 +513,7 @@ $fileType = strtoupper($doc['file_type']);
                         name="description"
                         class="form-control"
                         placeholder="Mô tả tóm tắt nội dung tài liệu..."
-                    ><?php echo htmlspecialchars($doc['description'] ?? ''); ?></textarea>
+                    ><?php echo htmlspecialchars($doc['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
 
                 <!-- Category -->
@@ -523,7 +523,7 @@ $fileType = strtoupper($doc['file_type']);
                         <option value="">— Chọn danh mục —</option>
                         <?php foreach ($categories as $cat): ?>
                             <option value="<?php echo $cat['category_id']; ?>" <?php echo $doc['category_id'] == $cat['category_id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($cat['category_name']); ?>
+                                <?php echo htmlspecialchars($cat['category_name'], ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -536,7 +536,7 @@ $fileType = strtoupper($doc['file_type']);
                         <option value="">— Chọn môn học —</option>
                         <?php foreach ($subjects as $sub): ?>
                             <option value="<?php echo $sub['subject_id']; ?>" <?php echo $doc['subject_id'] == $sub['subject_id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($sub['subject_name']); ?>
+                                <?php echo htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

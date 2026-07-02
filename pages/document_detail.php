@@ -82,14 +82,14 @@ $statusLabels = [
 $statusClass = $doc['status'];
 
 // Construct file URL
-$fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name']);
+$fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name'], ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($doc['title']); ?> - AI Study Hub</title>
+    <title><?php echo htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8'); ?> - AI Study Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/home.css">
@@ -573,7 +573,7 @@ $fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name']);
             <i class="fas fa-brain"></i> AI Study Hub
         </a>
         <div class="header-actions">
-            <span class="user-greeting">Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong></span>
+            <span class="user-greeting">Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name'], ENT_QUOTES, 'UTF-8'); ?></strong></span>
             <a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a>
             <a href="documents.php"><i class="fas fa-folder-open"></i> Tài liệu của tôi</a>
             <a href="upload.php" class="btn-upload-nav"><i class="fas fa-upload"></i> Upload</a>
@@ -598,9 +598,9 @@ $fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name']);
                     <i class="fas <?php echo $fileType === 'PDF' ? 'fa-file-pdf' : ($fileType === 'DOCX' ? 'fa-file-word' : 'fa-file-powerpoint'); ?>"></i>
                 </div>
                 <div class="doc-header-info">
-                    <h1><?php echo htmlspecialchars($doc['title']); ?></h1>
+                    <h1><?php echo htmlspecialchars($doc['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
                     <div class="doc-description-text">
-                        <strong>Mô tả:</strong> <?php echo !empty($doc['description']) ? nl2br(htmlspecialchars($doc['description'])) : 'Không có mô tả nào cho tài liệu này.'; ?>
+                        <strong>Mô tả:</strong> <?php echo !empty($doc['description']) ? nl2br(htmlspecialchars($doc['description'], ENT_QUOTES, 'UTF-8')) : 'Không có mô tả nào cho tài liệu này.'; ?>
                     </div>
                 </div>
             </div>

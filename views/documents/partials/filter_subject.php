@@ -18,7 +18,7 @@ $subjects = $subjects ?? [
         <option value="">Tất cả môn học</option>
         <?php foreach ($subjects as $subj): ?>
             <option value="<?php echo (int)$subj['id']; ?>" <?php echo ($current_subject === (int)$subj['id']) ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($subj['name']); ?>
+                <?php echo htmlspecialchars($subj['name'], ENT_QUOTES, 'UTF-8'); ?>
             </option>
         <?php endforeach; ?>
     </select>

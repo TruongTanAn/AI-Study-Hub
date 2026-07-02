@@ -1,64 +1,58 @@
 <?php
-/**
- * update_document.php
- * Validate và cập nhật thông tin tài liệu, trả về JSON.
- */
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Bạn cần đăng nhập để cập nhật tài liệu.',
-    ]);
+        'message' => 'Ban can dang nhap de cap nhat tai lieu.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode([
         'success' => false,
-        'message' => 'Phương thức yêu cầu không hợp lệ.',
-    ]);
+        'message' => 'Phuong thuc yeu cau khong hop le.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$userId = (int) $_SESSION['user_id'];
-$documentId = (int) ($_POST['document_id'] ?? 0);
-$title = trim($_POST['title'] ?? '');
-$description = trim($_POST['description'] ?? '');
+$userId = (int)$_SESSION['user_id'];
+$documentId = (int)($_POST['document_id'] ?? 0);
+$title = trim(to_utf8($_POST['title'] ?? ''));
+$description = trim(to_utf8($_POST['description'] ?? ''));
 $categoryId = isset($_POST['category_id']) && $_POST['category_id'] !== ''
-    ? (int) $_POST['category_id']
+    ? (int)$_POST['category_id']
     : null;
 $subjectId = isset($_POST['subject_id']) && $_POST['subject_id'] !== ''
-    ? (int) $_POST['subject_id']
+    ? (int)$_POST['subject_id']
     : null;
 $visibility = trim($_POST['visibility'] ?? '');
 
 if ($documentId <= 0) {
     echo json_encode([
         'success' => false,
-        'message' => 'Document ID không hợp lệ.',
-    ]);
+        'message' => 'Document ID khong hop le.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
 if ($title === '') {
     echo json_encode([
         'success' => false,
-        'message' => 'Tiêu đề không được để trống.',
-    ]);
+        'message' => 'Tieu de khong duoc de trong.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-if (strlen($title) > 255) {
+if (mb_strlen($title) > 255) {
     echo json_encode([
         'success' => false,
-        'message' => 'Tiêu đề không được vượt quá 255 ký tự.',
-    ]);
+        'message' => 'Tieu de khong duoc vuot qua 255 ky tu.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -66,12 +60,10 @@ $allowedVisibility = ['public', 'private', 'shared'];
 if ($visibility !== '' && !in_array($visibility, $allowedVisibility, true)) {
     echo json_encode([
         'success' => false,
-        'message' => 'Quyền hiển thị không hợp lệ.',
-    ]);
+        'message' => 'Quyen hien thi khong hop le.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
-
-require_once __DIR__ . '/../config/database.php';
 
 $checkSql = 'SELECT user_id, visibility FROM documents WHERE document_id = ?';
 $checkStmt = $conn->prepare($checkSql);
@@ -79,8 +71,8 @@ $checkStmt = $conn->prepare($checkSql);
 if ($checkStmt === false) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.',
-    ]);
+        'message' => 'Khong the ket noi du lieu. Vui long thu lai sau.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -93,12 +85,12 @@ $checkStmt->close();
 if (!$existingDocument) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không tìm thấy tài liệu.',
-    ]);
+        'message' => 'Khong tim thay tai lieu.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$isOwner = ((int) $existingDocument['user_id'] === $userId);
+$isOwner = ((int)$existingDocument['user_id'] === $userId);
 $userRole = 'user';
 
 $roleStmt = $conn->prepare('SELECT role FROM users WHERE user_id = ?');
@@ -108,7 +100,6 @@ if ($roleStmt) {
     $roleResult = $roleStmt->get_result();
     $roleData = $roleResult->fetch_assoc();
     $roleStmt->close();
-
     if ($roleData) {
         $userRole = $roleData['role'];
     }
@@ -117,8 +108,8 @@ if ($roleStmt) {
 if (!$isOwner && $userRole !== 'admin') {
     echo json_encode([
         'success' => false,
-        'message' => 'Bạn không có quyền cập nhật tài liệu này.',
-    ]);
+        'message' => 'Ban khong co quyen cap nhat tai lieu nay.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -134,12 +125,11 @@ if ($categoryId !== null && $categoryId > 0) {
         $categoryResult = $categoryStmt->get_result();
         $categoryExists = $categoryResult->fetch_assoc();
         $categoryStmt->close();
-
         if (!$categoryExists) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Danh mục không tồn tại.',
-            ]);
+                'message' => 'Danh muc khong ton tai.'
+            ], JSON_UNESCAPED_UNICODE);
             exit();
         }
     }
@@ -153,54 +143,43 @@ if ($subjectId !== null && $subjectId > 0) {
         $subjectResult = $subjectStmt->get_result();
         $subjectExists = $subjectResult->fetch_assoc();
         $subjectStmt->close();
-
         if (!$subjectExists) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Môn học không tồn tại.',
-            ]);
+                'message' => 'Mon hoc khong ton tai.'
+            ], JSON_UNESCAPED_UNICODE);
             exit();
         }
     }
 }
 
 $updateSql = 'UPDATE documents
-              SET title = ?, description = ?, category_id = ?, subject_id = ?, visibility = ?
+              SET title = ?, description = ?, category_id = ?, subject_id = ?, visibility = ?, updated_at = CURRENT_TIMESTAMP
               WHERE document_id = ?';
 $updateStmt = $conn->prepare($updateSql);
 
 if ($updateStmt === false) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.',
-    ]);
+        'message' => 'Khong the ket noi du lieu. Vui long thu lai sau.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$updateStmt->bind_param(
-    'ssiisi',
-    $title,
-    $description,
-    $categoryId,
-    $subjectId,
-    $visibility,
-    $documentId
-);
+$updateStmt->bind_param('ssiisi', $title, $description, $categoryId, $subjectId, $visibility, $documentId);
 
 if ($updateStmt->execute()) {
     $updateStmt->close();
-
     echo json_encode([
         'success' => true,
-        'message' => 'Cập nhật tài liệu thành công.',
+        'message' => 'Cap nhat tai lieu thanh cong.',
         'document_id' => $documentId,
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
 $updateStmt->close();
-
 echo json_encode([
     'success' => false,
-    'message' => 'Cập nhật tài liệu thất bại.',
-]);
+    'message' => 'Cap nhat tai lieu that bai.'
+], JSON_UNESCAPED_UNICODE);

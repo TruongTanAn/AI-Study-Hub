@@ -9,7 +9,7 @@ if (isset($_SESSION['user_id'])) {
 $errors = [];
 $success = '';
 if (isset($_GET['success'])) {
-    $success = htmlspecialchars($_GET['success']);
+    $success = htmlspecialchars($_GET['success'], ENT_QUOTES, 'UTF-8');
 }
 ?>
 <!DOCTYPE html>
@@ -18,6 +18,8 @@ if (isset($_GET['success'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - AI Study Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
