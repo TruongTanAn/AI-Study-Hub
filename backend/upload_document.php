@@ -121,35 +121,34 @@ chmod($targetPath, 0644);
 
 try {
     require_once __DIR__ . '/../config/database.php';
+
+    $documentData = [
+        'user_id' => $userId,
+        'title' => $title,
+        'description' => $description,
+        'file_name' => $secureFilename,
+        'original_name' => $originalName,
+        'file_path' => $targetPath,
+        'file_type' => strtoupper($extension),
+        'file_size' => $file['size'],
+        'visibility' => $visibility,
+        'status' => $status
+    ];
+
+    if (isset($_POST['category_id']) && !empty($_POST['category_id'])) {
+        $documentData['category_id'] = intval($_POST['category_id']);
+    }
+
+    require_once __DIR__ . '/save_document.php';
+
+    $saveResult = saveDocumentToDatabase($documentData);
+
+    if (!$saveResult['success']) {
+        throw new Exception($saveResult['error']);
+    }
 } catch (Exception $e) {
     if (file_exists($targetPath)) @unlink($targetPath);
-    returnJson(false, '', 'Lỗi kết nối database: ' . $e->getMessage());
-}
-
-$documentData = [
-    'user_id' => $userId,
-    'title' => $title,
-    'description' => $description,
-    'file_name' => $secureFilename,
-    'original_name' => $originalName,
-    'file_path' => $targetPath,
-    'file_type' => strtoupper($extension),
-    'file_size' => $file['size'],
-    'visibility' => $visibility,
-    'status' => $status
-];
-
-if (isset($_POST['category_id']) && !empty($_POST['category_id'])) {
-    $documentData['category_id'] = intval($_POST['category_id']);
-}
-
-require_once __DIR__ . '/save_document.php';
-
-$saveResult = saveDocumentToDatabase($documentData);
-
-if (!$saveResult['success']) {
-    if (file_exists($targetPath)) @unlink($targetPath);
-    returnJson(false, '', 'Không thể lưu thông tin tài liệu: ' . $saveResult['error']);
+    returnJson(false, '', 'Lỗi lưu trữ dữ liệu: ' . $e->getMessage());
 }
 
 $documentId = $saveResult['document_id'];

@@ -68,7 +68,7 @@ function saveDocumentToDatabase($data) {
     }
 
     $stmt->bind_param(
-        "isssssisssi",
+        "issssssissi",
         $userId, $title, $description, $fileName, $originalName,
         $filePath, $fileType, $fileSize, $visibility, $status, $categoryId
     );
