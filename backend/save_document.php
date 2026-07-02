@@ -313,3 +313,114 @@ function incrementDownloadCount($documentId) {
 
     return $result;
 }
+
+function updateDocument($documentId, $userId, $data) {
+    global $conn;
+
+    $documentId = intval($documentId);
+    $userId = intval($userId);
+
+    $checkStmt = $conn->prepare("SELECT user_id, file_path FROM documents WHERE document_id = ?");
+    $checkStmt->bind_param("i", $documentId);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+
+    if ($checkResult->num_rows === 0) {
+        $checkStmt->close();
+        return [
+            'success' => false,
+            'error' => 'Tài liệu không tồn tại'
+        ];
+    }
+
+    $document = $checkResult->fetch_assoc();
+    $userRole = isset($_SESSION['role']) ? $_SESSION['role'] : 'user';
+
+    if ($document['user_id'] !== $userId && $userRole !== 'admin') {
+        $checkStmt->close();
+        return [
+            'success' => false,
+            'error' => 'Bạn không có quyền chỉnh sửa tài liệu này'
+        ];
+    }
+    $checkStmt->close();
+
+    $title = isset($data['title']) ? trim($data['title']) : '';
+    $description = isset($data['description']) ? trim($data['description']) : '';
+    $visibility = isset($data['visibility']) ? trim($data['visibility']) : 'public';
+    $categoryId = isset($data['category_id']) && !empty($data['category_id']) ? intval($data['category_id']) : null;
+    $subjectId = isset($data['subject_id']) && !empty($data['subject_id']) ? intval($data['subject_id']) : null;
+
+    if (empty($title)) {
+        return [
+            'success' => false,
+            'error' => 'Tiêu đề không được để trống'
+        ];
+    }
+
+    if (strlen($title) > 255) {
+        return [
+            'success' => false,
+            'error' => 'Tiêu đề quá dài (tối đa 255 ký tự)'
+        ];
+    }
+
+    $validVisibilities = ['public', 'private', 'shared'];
+    if (!in_array($visibility, $validVisibilities)) {
+        return [
+            'success' => false,
+            'error' => 'Chế độ hiển thị không hợp lệ'
+        ];
+    }
+
+    $updateFields = "title = ?, description = ?, visibility = ?";
+    $params = [$title, $description, $visibility];
+    $types = "sss";
+
+    if ($categoryId !== null) {
+        $updateFields .= ", category_id = ?";
+        $params[] = $categoryId;
+        $types .= "i";
+    } else {
+        $updateFields .= ", category_id = NULL";
+    }
+
+    if ($subjectId !== null) {
+        $updateFields .= ", subject_id = ?";
+        $params[] = $subjectId;
+        $types .= "i";
+    } else {
+        $updateFields .= ", subject_id = NULL";
+    }
+
+    $params[] = $documentId;
+    $types .= "i";
+
+    $stmt = $conn->prepare("UPDATE documents SET {$updateFields}, updated_at = CURRENT_TIMESTAMP WHERE document_id = ?");
+
+    if (!$stmt) {
+        return [
+            'success' => false,
+            'error' => 'Prepare UPDATE failed: ' . $conn->error
+        ];
+    }
+
+    $stmt->bind_param($types, ...$params);
+
+    if (!$stmt->execute()) {
+        $error = $stmt->error;
+        $stmt->close();
+        return [
+            'success' => false,
+            'error' => 'Execute UPDATE failed: ' . $error
+        ];
+    }
+
+    $stmt->close();
+
+    return [
+        'success' => true,
+        'message' => 'Cập nhật tài liệu thành công',
+        'document_id' => $documentId
+    ];
+}
