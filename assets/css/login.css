@@ -6,8 +6,14 @@
 }
 
 body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: #f8fafc;
+}
+
+*,
+*::before,
+*::after {
+    font-family: inherit;
 }
 
 /* WRAPPER */

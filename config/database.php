@@ -1,5 +1,10 @@
 <?php
+/**
+ * AI Study Hub - Database Configuration
+ * Ket noi MySQL voi encoding UTF-8mb4 day du.
+ */
 
+<<<<<<< HEAD
 /**
  * AI Study Hub - Database Configuration
  *
@@ -8,6 +13,17 @@
  *
  * Fallback cho local (XAMPP) neu khong co bien moi truong.
  */
+=======
+// UTF-8 headers (cho tat ca output)
+header('Content-Type: text/html; charset=utf-8');
+header('X-Content-Type-Options: nosniff');
+
+// Ket noi database
+$dbHost = 'localhost';
+$dbUser = 'root';
+$dbPass = '';
+$dbName = 'ai_study_hub';
+>>>>>>> f9777c795a599b3177a3020d309477735eab22fa
 
 // ============================================================
 // DEBUG: Hien thi loi de truy tim nguyen nhan HTTP 500
@@ -37,6 +53,7 @@ if ((int)$dbPort > 0 && (int)$dbPort !== 3306) {
 
 if (!$conn) {
     http_response_code(500);
+<<<<<<< HEAD
     header('Content-Type: application/json; charset=utf-8');
     $errMsg = mysqli_connect_error();
     $errNo  = mysqli_connect_errno();
@@ -51,13 +68,28 @@ if (!$conn) {
             'errno'  => $errNo,
             'errstr' => $errMsg,
         ],
+=======
+    echo json_encode([
+        'success' => false,
+        'error' => 'Ket noi database that bai'
+>>>>>>> f9777c795a599b3177a3020d309477735eab22fa
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
+<<<<<<< HEAD
 mysqli_set_charset($conn, 'utf8mb4');
 
 // Log success
 if (function_exists('error_log')) {
     error_log('[database.php] Connected OK to ' . $dbHost);
 }
+=======
+// FIX: Su dung SET NAMES utf8mb4 thay cho mysqli_set_charset
+// Day la cach dang tin cay de dam bao tat ca truy van deu dung UTF-8
+$conn->set_charset('utf8mb4');
+$conn->query("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+// Ngon ngu string cua PHP
+mb_internal_encoding('UTF-8');
+>>>>>>> f9777c795a599b3177a3020d309477735eab22fa

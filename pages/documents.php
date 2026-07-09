@@ -2,8 +2,8 @@
 require_once '../includes/auth_check.php';
 require_once '../config/database.php';
 
-$success_msg = isset($_GET['success']) ? htmlspecialchars($_GET['success']) : '';
-$error_msg = isset($_GET['error']) ? htmlspecialchars($_GET['error']) : '';
+$success_msg = isset($_GET['success']) ? htmlspecialchars($_GET['success'], ENT_QUOTES, 'UTF-8') : '';
+$error_msg = isset($_GET['error']) ? htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8') : '';
 
 // Fetch categories for filtering pills
 $categories = [];
@@ -606,7 +606,7 @@ if ($catResult) {
             <i class="fas fa-brain"></i> AI Study Hub
         </a>
         <div class="header-actions">
-            <span class="user-greeting">Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong></span>
+            <span class="user-greeting">Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name'], ENT_QUOTES, 'UTF-8'); ?></strong></span>
             <a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a>
             <a href="documents.php" class="active"><i class="fas fa-folder-open"></i> Tài liệu của tôi</a>
             <a href="upload.php" class="btn-upload-nav"><i class="fas fa-upload"></i> Upload</a>
@@ -649,7 +649,7 @@ if ($catResult) {
                 <span class="category-pill active" data-category="all">Tất cả</span>
                 <?php foreach ($categories as $cat): ?>
                     <span class="category-pill" data-category="<?php echo $cat['category_id']; ?>">
-                        <?php echo htmlspecialchars($cat['category_name']); ?>
+                        <?php echo htmlspecialchars($cat['category_name'], ENT_QUOTES, 'UTF-8'); ?>
                     </span>
                 <?php endforeach; ?>
             </div>

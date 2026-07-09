@@ -1,0 +1,14 @@
+# AI Study Hub - UTF-8 & Encoding Settings
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .php .html .css .js .json
+
+<FilesMatch "\.php$">
+    ForceType application/x-httpd-php-source
+</FilesMatch>
+
+# PHP settings
+<IfModule mod_php.c>
+    php_value default_charset "UTF-8"
+    php_value mbstring.internal_encoding "UTF-8"
+    php_value output_buffering "On"
+</IfModule>

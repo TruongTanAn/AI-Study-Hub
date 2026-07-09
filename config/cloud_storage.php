@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 class CloudStorage {
     private static function detectBaseUrl(): string {
         // Auto-detect the base path from the script location
@@ -85,4 +86,19 @@ class CloudStorage {
 
         return false;
     }
+=======
+define('CLOUD_STORAGE_ENABLED', false);
+define('CLOUD_STORAGE_PROVIDER', 'local');
+
+define('UPLOAD_MAX_SIZE', 50 * 1024 * 1024);
+define('ALLOWED_FILE_TYPES', ['pdf', 'docx', 'pptx']);
+
+function getCloudStorageConfig() {
+    return [
+        'enabled' => CLOUD_STORAGE_ENABLED,
+        'provider' => CLOUD_STORAGE_PROVIDER,
+        'upload_max_size' => UPLOAD_MAX_SIZE,
+        'allowed_types' => ALLOWED_FILE_TYPES
+    ];
+>>>>>>> f9777c795a599b3177a3020d309477735eab22fa
 }

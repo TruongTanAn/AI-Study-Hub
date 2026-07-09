@@ -1,0 +1,4 @@
+USE ai_study_hub;
+SET FOREIGN_KEY_CHECKS = 0;
+ALTER TABLE downloads DROP FOREIGN KEY downloads_ibfk_1;
+SET FOREIGN_KEY_CHECKS = 1;

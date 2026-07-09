@@ -1,10 +1,11 @@
 <?php
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
-session_start();
-include "../config/database.php";
+header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION["user_id"])) {
-    die("Vui lòng đăng nhập");
+    die(json_encode(["success" => false, "message" => "Vui long dang nhap"], JSON_UNESCAPED_UNICODE));
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -12,86 +13,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $userId = $_SESSION["user_id"];
 
     if (!isset($_FILES["avatar"])) {
-        die("Chưa chọn ảnh");
+        die(json_encode(["success" => false, "message" => "Chua chon anh"], JSON_UNESCAPED_UNICODE));
     }
-
-    // Kiểm tra lỗi upload
 
     if ($_FILES["avatar"]["error"] != 0) {
-        die("Upload thất bại");
+        die(json_encode(["success" => false, "message" => "Upload that bai"], JSON_UNESCAPED_UNICODE));
     }
 
-    // Kiểm tra loại file
+    $fileType = strtolower(pathinfo($_FILES["avatar"]["name"], PATHINFO_EXTENSION));
 
-    $fileType = strtolower(
-        pathinfo(
-            $_FILES["avatar"]["name"],
-            PATHINFO_EXTENSION
-        )
-    );
-
-    $allowTypes = [
-        "jpg",
-        "jpeg",
-        "png",
-        "gif"
-    ];
+    $allowTypes = ["jpg", "jpeg", "png", "gif"];
 
     if (!in_array($fileType, $allowTypes)) {
-        die("Chỉ cho phép jpg, jpeg, png, gif");
+        die(json_encode(["success" => false, "message" => "Chi cho phep jpg, jpeg, png, gif"], JSON_UNESCAPED_UNICODE));
     }
-
-    // Kiểm tra dung lượng
 
     if ($_FILES["avatar"]["size"] > 2000000) {
-        die("Ảnh vượt quá 2MB");
+        die(json_encode(["success" => false, "message" => "Anh vuot qua 2MB"], JSON_UNESCAPED_UNICODE));
     }
 
-    // Đặt tên file
+    $fileName = time() . "_" . basename($_FILES["avatar"]["name"]);
+    $targetPath = "../uploads/" . $fileName;
 
-    $fileName =
-        time() . "_" .
-        basename($_FILES["avatar"]["name"]);
+    if (move_uploaded_file($_FILES["avatar"]["tmp_name"], $targetPath)) {
 
-    $targetPath =
-        "../uploads/" . $fileName;
-
-    // Upload file
-
-    if (
-        move_uploaded_file(
-            $_FILES["avatar"]["tmp_name"],
-            $targetPath
-        )
-    ) {
-
-        $stmt = $conn->prepare("
-            UPDATE users
-            SET avatar = ?
-            WHERE user_id = ?
-        ");
-
-        $stmt->bind_param(
-            "si",
-            $fileName,
-            $userId
-        );
-
+        $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE user_id = ?");
+        $stmt->bind_param("si", $fileName, $userId);
         $stmt->execute();
 
         echo json_encode([
             "success" => true,
-            "message" => "Upload avatar thành công"
-        ]);
+            "message" => "Upload avatar thanh cong"
+        ], JSON_UNESCAPED_UNICODE);
 
     } else {
-
         echo json_encode([
             "success" => false,
-            "message" => "Upload avatar thất bại"
-        ]);
-
+            "message" => "Upload avatar that bai"
+        ], JSON_UNESCAPED_UNICODE);
     }
 
 }
-?>

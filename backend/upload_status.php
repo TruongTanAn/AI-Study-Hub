@@ -1,27 +1,23 @@
 <?php
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'error' => 'Vui lòng đăng nhập'
-    ]);
+        'error' => 'Vui long dang nhap'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
-
-require_once __DIR__ . '/../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $userId = intval($_SESSION['user_id']);
 
     try {
         $stmt = $conn->prepare("
-            SELECT 
+            SELECT
                 d.document_id,
                 d.user_id,
                 d.category_id,
@@ -56,9 +52,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $documents = [];
         while ($row = $result->fetch_assoc()) {
-            $row['id'] = $row['document_id'];
-            $row['file_size_formatted'] = formatFileSize($row['file_size']);
-            $row['status_text'] = getStatusText($row['status']);
+            // FIX: Force UTF-8 on every DB string field
+            $row['id'] = (int)$row['document_id'];
+            $row['title'] = to_utf8($row['title']);
+            $row['description'] = to_utf8($row['description']);
+            $row['file_name'] = to_utf8($row['file_name']);
+            $row['original_name'] = to_utf8($row['original_name']);
+            $row['category_name'] = to_utf8($row['category_name'] ?? '');
+            $row['subject_name'] = to_utf8($row['subject_name'] ?? '');
+            $row['file_size_formatted'] = format_filesize((int)$row['file_size']);
+            $row['status_text'] = get_status_text($row['status']);
             $documents[] = $row;
         }
 
@@ -69,32 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'success' => true,
             'count' => count($documents),
             'documents' => $documents
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     } catch (Exception $e) {
         echo json_encode([
             'success' => false,
-            'error' => 'Lỗi cơ sở dữ liệu: ' . $e->getMessage()
-        ]);
+            'error' => 'Loi co so du lieu: ' . $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
-}
-
-function getStatusText($status) {
-    $statuses = [
-        'pending' => 'Đang chờ duyệt',
-        'approved' => 'Đã duyệt',
-        'rejected' => 'Từ chối'
-    ];
-    return $statuses[$status] ?? 'Không xác định';
-}
-
-function formatFileSize($bytes) {
-    $units = ['B', 'KB', 'MB', 'GB'];
-    $unitIndex = 0;
-    while ($bytes >= 1024 && $unitIndex < count($units) - 1) {
-        $bytes /= 1024;
-        $unitIndex++;
-    }
-    return round($bytes, 2) . ' ' . $units[$unitIndex];
 }

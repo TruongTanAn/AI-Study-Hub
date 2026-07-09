@@ -1,31 +1,19 @@
 <?php
-/**
- * get_profile.php
- * Lấy thông tin hồ sơ người dùng hiện tại từ session, trả về JSON.
- */
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Bắt đầu session nếu chưa tồn tại
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Kiểm tra đăng nhập — chưa đăng nhập trả về lỗi JSON
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Bạn cần đăng nhập để xem hồ sơ.',
-    ]);
+        'message' => 'Ban can dang nhap de xem ho so.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$userId = (int) $_SESSION['user_id'];
+$userId = (int)$_SESSION['user_id'];
 
-// Kết nối database thông qua config/database.php
-require_once __DIR__ . '/../config/database.php';
-
-// Lấy thông tin user theo user_id (chỉ các trường cần thiết, không lấy password)
 $sql = 'SELECT user_id, full_name, email, avatar, role, status, created_at
         FROM users
         WHERE user_id = ?';
@@ -34,8 +22,8 @@ $stmt = $conn->prepare($sql);
 if ($stmt === false) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.',
-    ]);
+        'message' => 'Khong the ket noi du lieu. Vui long thu lai sau.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -45,16 +33,20 @@ $result = $stmt->get_result();
 $userData = $result->fetch_assoc();
 $stmt->close();
 
-// Không tìm thấy user trong database
 if (!$userData) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không tìm thấy thông tin người dùng.',
-    ]);
+        'message' => 'Khong tim thay thong tin nguoi dung.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
+// FIX: Force UTF-8 on DB strings
+$userData['full_name'] = to_utf8($userData['full_name']);
+$userData['email'] = to_utf8($userData['email']);
+$userData['avatar'] = to_utf8($userData['avatar'] ?? '');
+
 echo json_encode([
     'success' => true,
-    'data' => $userData,
-]);
+    'data' => $userData
+], JSON_UNESCAPED_UNICODE);
