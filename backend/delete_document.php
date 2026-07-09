@@ -1,73 +1,78 @@
 <?php
+/**
+ * delete_document.php
+ * Xóa tài liệu khỏi database (chỉ cho phép chính chủ sở hữu tài liệu xóa).
+ */
+
+header('Content-Type: application/json; charset=utf-8');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-header('Content-Type: application/json; charset=utf-8');
-
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/save_document.php';
-
+// 1. Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'error' => 'Vui lòng đăng nhập'
+        'message' => 'Bạn cần đăng nhập để thực hiện chức năng này.'
     ]);
-    exit;
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+require_once '../config/database.php';
+$current_user_id = (int)$_SESSION['user_id'];
+
+// 2. Lấy document_id từ request (hỗ trợ cả POST và GET để linh hoạt kết nối UI)
+$document_id = isset($_REQUEST['document_id']) ? (int)$_REQUEST['document_id'] : 0;
+
+if ($document_id <= 0) {
     echo json_encode([
         'success' => false,
-        'error' => 'Phương thức không được hỗ trợ'
+        'message' => 'ID tài liệu không hợp lệ.'
     ]);
-    exit;
+    exit();
 }
 
-$documentId = 0;
+try {
+    // 3. Kiểm tra xem tài liệu có tồn tại và có thuộc quyền sở hữu của user này không (Phân quyền)
+    $stmt = $conn->prepare("SELECT id, user_id, file_path FROM documents WHERE id = ? LIMIT 1");
+    $stmt->execute([$document_id]);
+    $document = $stmt->fetch();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $documentId = isset($_POST['document_id']) ? intval($_POST['document_id']) : 0;
-} else {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $documentId = isset($input['document_id']) ? intval($input['document_id']) : 0;
-}
+    if (!$document) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Tài liệu không tồn tại trên hệ thống.'
+        ]);
+        exit();
+    }
 
-if ($documentId <= 0) {
+    if ((int)$document['user_id'] !== $current_user_id) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Bạn không có quyền xóa tài liệu của người khác!'
+        ]);
+        exit();
+    }
+
+    // 4. Tiến hành xóa trong Database
+    $delete_stmt = $conn->prepare("DELETE FROM documents WHERE id = ?");
+    $delete_stmt->execute([$document_id]);
+
+    // 5. (Tùy chọn bổ sung) Xóa file vật lý trên server nếu lưu local để tránh rác bộ nhớ
+    if (!empty($document['file_path']) && file_exists($document['file_path'])) {
+        unlink($document['file_path']); 
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Xóa tài liệu thành công!'
+    ]);
+
+} catch (PDOException $e) {
     echo json_encode([
         'success' => false,
-        'error' => 'ID tài liệu không hợp lệ'
+        'message' => 'Lỗi hệ thống không thể xóa: ' . $e->getMessage()
     ]);
-    exit;
 }
-
-$userId = $_SESSION['user_id'];
-$userRole = isset($_SESSION['role']) ? $_SESSION['role'] : 'user';
-
-$checkStmt = $conn->prepare("SELECT user_id FROM documents WHERE document_id = ?");
-$checkStmt->bind_param("i", $documentId);
-$checkStmt->execute();
-$checkResult = $checkStmt->get_result();
-
-if ($checkResult->num_rows === 0) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Tài liệu không tồn tại'
-    ]);
-    exit;
-}
-
-$document = $checkResult->fetch_assoc();
-
-if ($document['user_id'] !== $userId && $userRole !== 'admin') {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Bạn không có quyền xóa tài liệu này'
-    ]);
-    exit;
-}
-
-$result = deleteDocument($documentId, $userId);
-
-echo json_encode($result);
+exit();
