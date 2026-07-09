@@ -1,0 +1,2 @@
+RAG test run at 2026-07-09 15:54:14 -> PASS=0 FAIL=3
+RAG test run at 2026-07-09 15:54:59 -> PASS=1 FAIL=3

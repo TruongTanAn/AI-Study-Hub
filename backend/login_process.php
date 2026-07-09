@@ -17,7 +17,7 @@ if ($email === '' || $password === '') {
 
 require_once __DIR__ . '/../config/database.php';
 
-$sql = 'SELECT user_id, full_name, email, password FROM users WHERE email = ?';
+$sql = 'SELECT user_id, full_name, email, password, role FROM users WHERE email = ?';
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {
@@ -36,6 +36,7 @@ if ($userData && password_verify($password, $userData['password'])) {
     $_SESSION['user_id'] = $userData['user_id'];
     $_SESSION['full_name'] = $userData['full_name'];
     $_SESSION['email'] = $userData['email'];
+    $_SESSION['role'] = $userData['role'] ?? 'user';
 
     header('Location: ../pages/dashboard.php');
     exit();

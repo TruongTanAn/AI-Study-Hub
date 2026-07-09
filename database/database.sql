@@ -1,6 +1,13 @@
 CREATE DATABASE IF NOT EXISTS ai_study_hub;
 USE ai_study_hub;
 
+-- Ensure ai_user (created by MYSQL_USER env) has full access on this DB
+-- This fixes "permission denied" errors when PHP code connects via ai_user
+CREATE USER IF NOT EXISTS 'ai_user'@'%' IDENTIFIED BY 'ai_password';
+ALTER USER 'ai_user'@'%' IDENTIFIED WITH mysql_native_password BY 'ai_password';
+GRANT ALL PRIVILEGES ON ai_study_hub.* TO 'ai_user'@'%';
+FLUSH PRIVILEGES;
+
 CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
@@ -86,6 +93,48 @@ CREATE TABLE IF NOT EXISTS password_resets (
     expires_at DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+-- ================================================================
+-- Week 5 (AN - AI Integration): conversations + chat_messages
+-- These tables are required by backend/load_chat_history.php
+-- and backend/document_qa.php
+-- ================================================================
+CREATE TABLE IF NOT EXISTS conversations (
+    conversation_id INT(11)       NOT NULL AUTO_INCREMENT,
+    user_id         INT(11)       NOT NULL,
+    title           VARCHAR(255)  NOT NULL DEFAULT 'Cuoc tro chuyen moi',
+    document_id     INT(11)       DEFAULT NULL,
+    model           VARCHAR(120)  DEFAULT NULL,
+    created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (conversation_id),
+    KEY idx_conversations_user        (user_id),
+    KEY idx_conversations_document    (document_id),
+    KEY idx_conversations_updated_at  (updated_at),
+    CONSTRAINT fk_conversations_user_id
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_conversations_document_id
+        FOREIGN KEY (document_id) REFERENCES documents(document_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    message_id        INT(11)                            NOT NULL AUTO_INCREMENT,
+    conversation_id   INT(11)                            NOT NULL,
+    role              ENUM('user','assistant','system')  NOT NULL,
+    message           LONGTEXT                           NOT NULL,
+    document_id       INT(11)                            DEFAULT NULL,
+    prompt_tokens     INT(11)                            NOT NULL DEFAULT 0,
+    completion_tokens INT(11)                            NOT NULL DEFAULT 0,
+    created_at        TIMESTAMP                          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (message_id),
+    KEY idx_chat_messages_conversation (conversation_id),
+    KEY idx_chat_messages_document     (document_id),
+    KEY idx_chat_messages_created_at   (created_at),
+    CONSTRAINT fk_chat_messages_conversation_id
+        FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_messages_document_id
+        FOREIGN KEY (document_id) REFERENCES documents(document_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO categories (category_name) VALUES 
     ('Toán học'),

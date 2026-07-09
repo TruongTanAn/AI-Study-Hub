@@ -1,0 +1,58 @@
+# =========================================
+# Docker Ignore - AI Study Hub
+# =========================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+.docker
+docker-compose.override.yml
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/*
+!logs/.gitkeep
+
+# Cache
+cache/*
+!cache/.gitkeep
+
+# Uploads (do not include user data in image)
+uploads/*
+!uploads/.gitkeep
+!uploads/documents/.gitkeep
+
+# Node (if any)
+node_modules
+npm-debug.log
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+*.zip
+*.tar.gz
+
+# Documentation (optional)
+docs/
+
+# Agent transcripts
+agent-transcripts/
+
+# Environment
+.env.local
+.env.*.local
