@@ -24,6 +24,15 @@
  *      ]);
  */
 
+// ============================================================
+// DEBUG: Hien thi loi truc tiep de truy tim nguyen nhan HTTP 500
+// ============================================================
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/../logs/php_error.log');
+
 // Helpers shared by other weeks - load only if available (do not modify those files)
 $__an_utf8_helper = __DIR__ . '/../includes/utf8_helper.php';
 if (is_file($__an_utf8_helper)) {

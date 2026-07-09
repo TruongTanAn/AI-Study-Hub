@@ -1,0 +1,50 @@
+[09-Jul-2026 22:53:22 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'ai_study_hub.conversations' doesn't exist in /var/www/html/backend/load_chat_history.php:128
+Stack trace:
+#0 /var/www/html/backend/load_chat_history.php(128): mysqli->prepare('SELECT c.conver...')
+#1 {main}
+  thrown in /var/www/html/backend/load_chat_history.php on line 128
+[09-Jul-2026 22:53:28 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'ai_study_hub.conversations' doesn't exist in /var/www/html/backend/conversation_helpers.php:70
+Stack trace:
+#0 /var/www/html/backend/conversation_helpers.php(70): mysqli->prepare('INSERT INTO con...')
+#1 /var/www/html/backend/chat_api.php(363): ai_db_ensure_conversation(Object(mysqli), 1, 0, 0, '')
+#2 {main}
+  thrown in /var/www/html/backend/conversation_helpers.php on line 70
+[09-Jul-2026 22:56:11 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'ai_study_hub.conversations' doesn't exist in /var/www/html/backend/load_chat_history.php:128
+Stack trace:
+#0 /var/www/html/backend/load_chat_history.php(128): mysqli->prepare('SELECT c.conver...')
+#1 {main}
+  thrown in /var/www/html/backend/load_chat_history.php on line 128
+[09-Jul-2026 22:56:21 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'ai_study_hub.conversations' doesn't exist in /var/www/html/backend/conversation_helpers.php:70
+Stack trace:
+#0 /var/www/html/backend/conversation_helpers.php(70): mysqli->prepare('INSERT INTO con...')
+#1 /var/www/html/backend/document_qa.php(149): ai_db_ensure_conversation(Object(mysqli), 1, 0, 1, 'QA: 5636')
+#2 /var/www/html/backend/document_qa.php(304): ai_document_qa(Object(mysqli), 1, Array)
+#3 {main}
+  thrown in /var/www/html/backend/conversation_helpers.php on line 70
+[09-Jul-2026 23:03:07 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'ai_study_hub.conversations' doesn't exist in /var/www/html/backend/load_chat_history.php:128
+Stack trace:
+#0 /var/www/html/backend/load_chat_history.php(128): mysqli->prepare('SELECT c.conver...')
+#1 {main}
+  thrown in /var/www/html/backend/load_chat_history.php on line 128
+[09-Jul-2026 23:03:12 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'ai_study_hub.conversations' doesn't exist in /var/www/html/backend/conversation_helpers.php:70
+Stack trace:
+#0 /var/www/html/backend/conversation_helpers.php(70): mysqli->prepare('INSERT INTO con...')
+#1 /var/www/html/backend/document_qa.php(149): ai_db_ensure_conversation(Object(mysqli), 1, 0, 1, 'QA: 543746')
+#2 /var/www/html/backend/document_qa.php(304): ai_document_qa(Object(mysqli), 1, Array)
+#3 {main}
+  thrown in /var/www/html/backend/conversation_helpers.php on line 70
+[09-Jul-2026 23:10:24 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected token "\" in Command line code on line 1
+[09-Jul-2026 23:10:50 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected token "\" in Command line code on line 1
+[09-Jul-2026 23:11:04 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected token "/" in Command line code on line 1
+[09-Jul-2026 23:11:24 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected end of file in Command line code on line 1
+[09-Jul-2026 23:11:41 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected end of file in Command line code on line 1
+[09-Jul-2026 23:12:09 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected end of file in Command line code on line 1
+[09-Jul-2026 23:17:22 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught Error: Undefined constant "Test1234" in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1
+[09-Jul-2026 23:17:29 Asia/Ho_Chi_Minh] PHP Fatal error:  Uncaught Error: Undefined constant "Test1234" in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1
+[09-Jul-2026 23:17:29 Asia/Ho_Chi_Minh] PHP Parse error:  syntax error, unexpected end of file in Command line code on line 1

@@ -1,16 +1,36 @@
 <?php
 
 class CloudStorage {
+    private static function detectBaseUrl(): string {
+        // Auto-detect the base path from the script location
+        // For Docker: /var/www/html/ -> /
+        // For XAMPP: /AI-Study-Hubb/ -> /AI-Study-Hubb/
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $dir = dirname($scriptName);
+        // Go up two levels (e.g. /pages/login.php -> /)
+        $parts = explode('/', trim($dir, '/'));
+        if (count($parts) >= 2) {
+            $base = '/' . $parts[0] . '/';
+        } else {
+            $base = '/';
+        }
+        return $base . 'uploads/documents/';
+    }
+
     private static $config = [
         'provider' => 'local',
         'local' => [
             'upload_dir' => __DIR__ . '/../uploads/documents/',
-            'base_url' => '/AI-Study-Hubb/uploads/documents/'
+            'base_url' => null // computed dynamically
         ]
     ];
 
     public static function getConfig() {
-        return self::$config;
+        $cfg = self::$config;
+        if ($cfg['local']['base_url'] === null) {
+            $cfg['local']['base_url'] = self::detectBaseUrl();
+        }
+        return $cfg;
     }
 
     public static function upload($fileTmpName, $filename, $folder = 'documents') {
@@ -18,7 +38,8 @@ class CloudStorage {
     }
 
     public static function uploadToLocal($fileTmpName, $filename, $folder = 'documents') {
-        $uploadDir = self::$config['local']['upload_dir'];
+        $config = self::getConfig();
+        $uploadDir = $config['local']['upload_dir'];
 
         if (!file_exists($uploadDir)) {
             if (!mkdir($uploadDir, 0755, true)) {
@@ -42,7 +63,7 @@ class CloudStorage {
             chmod($targetPath, 0644);
             return [
                 'success' => true,
-                'url' => self::$config['local']['base_url'] . $filename,
+                'url' => $config['local']['base_url'] . $filename,
                 'path' => $targetPath
             ];
         }

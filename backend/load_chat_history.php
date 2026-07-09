@@ -8,6 +8,15 @@
  *  - (mac dinh): conversations neu khong co conversation_id; messages neu co.
  */
 
+// ============================================================
+// DEBUG: Hien thi loi truc tiep de truy tim nguyen nhan HTTP 500
+// ============================================================
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/../logs/php_error.log');
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (session_status() === PHP_SESSION_NONE) {
