@@ -33,6 +33,29 @@ require_once '../includes/auth_check.php';
         .dashboard-header a:hover {
             background: rgba(255,255,255,0.3);
         }
+        .dashboard-header .admin-link {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            color: white !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        }
+        .dashboard-header .admin-link:hover {
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+            transform: translateY(-1px);
+        }
+        .dashboard-header .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: rgba(245, 158, 11, 0.95);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         .dashboard-content {
             padding: 60px 0;
         }
@@ -107,7 +130,17 @@ require_once '../includes/auth_check.php';
             <i class="fas fa-brain"></i> AI Study Hub
         </div>
         <div class="user-info">
-            <span>Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong></span>
+            <span>
+                Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong>
+                <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+                    <span class="admin-badge" title="Tài khoản có quyền quản trị"><i class="fas fa-shield-halved"></i> Admin</span>
+                <?php endif; ?>
+            </span>
+            <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+                <a href="../admin/dashboard.php" class="admin-link" title="Vào khu vực quản trị">
+                    <i class="fas fa-shield-halved"></i> Quản trị
+                </a>
+            <?php endif; ?>
             <a href="profile.php"><i class="fas fa-user"></i> Hồ sơ</a>
             <a href="../backend/logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
