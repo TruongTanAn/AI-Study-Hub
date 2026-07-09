@@ -7,6 +7,8 @@ require_once '../includes/auth_check.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - AI Study Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -107,7 +109,7 @@ require_once '../includes/auth_check.php';
             <i class="fas fa-brain"></i> AI Study Hub
         </div>
         <div class="user-info">
-            <span>Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong></span>
+            <span>Xin chào, <strong><?php echo htmlspecialchars($_SESSION['full_name'], ENT_QUOTES, 'UTF-8'); ?></strong></span>
             <a href="profile.php"><i class="fas fa-user"></i> Hồ sơ</a>
             <a href="../backend/logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>

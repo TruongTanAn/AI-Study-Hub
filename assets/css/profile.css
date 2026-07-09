@@ -13,6 +13,16 @@
     --transition: .3s ease;
 }
 
+body {
+    font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    font-family: inherit;
+}
+
 .profile-container {
     max-width: 1000px;
     margin: 100px auto 50px;

@@ -1,68 +1,53 @@
 <?php
-/**
- * validate_profile.php
- * Validate dữ liệu cập nhật hồ sơ từ form, trả về kết quả JSON.
- */
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Bắt đầu session nếu chưa tồn tại
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Bạn cần đăng nhập để cập nhật hồ sơ.',
-    ]);
+        'message' => 'Ban can dang nhap de cap nhat ho so.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-// Chỉ chấp nhận phương thức POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode([
         'success' => false,
-        'message' => 'Phương thức yêu cầu không hợp lệ.',
-    ]);
+        'message' => 'Phuong thuc yeu cau khong hop le.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$userId = (int) $_SESSION['user_id'];
-$fullName = trim($_POST['full_name'] ?? '');
+$userId = (int)$_SESSION['user_id'];
+$fullName = trim(to_utf8($_POST['full_name'] ?? ''));
 $email = trim($_POST['email'] ?? '');
 
-// Validate: họ tên không được rỗng
 if ($fullName === '') {
     echo json_encode([
         'success' => false,
-        'message' => 'Họ tên không được để trống.',
-    ]);
+        'message' => 'Ho ten khong duoc de trong.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-// Validate: email đúng định dạng
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode([
         'success' => false,
-        'message' => 'Email không đúng định dạng.',
-    ]);
+        'message' => 'Email khong dung dinh dang.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-// Kết nối database thông qua config/database.php
-require_once __DIR__ . '/../config/database.php';
-
-// Validate: email không trùng với tài khoản khác
 $sql = 'SELECT user_id FROM users WHERE email = ? AND user_id != ?';
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.',
-    ]);
+        'message' => 'Khong the ket noi du lieu. Vui long thu lai sau.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -75,12 +60,12 @@ $stmt->close();
 if ($existingUser) {
     echo json_encode([
         'success' => false,
-        'message' => 'Email đã được sử dụng bởi tài khoản khác.',
-    ]);
+        'message' => 'Email da duoc su dung boi tai khoan khac.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
 echo json_encode([
     'success' => true,
-    'message' => 'Dữ liệu hợp lệ.',
-]);
+    'message' => 'Du lieu hop le.'
+], JSON_UNESCAPED_UNICODE);

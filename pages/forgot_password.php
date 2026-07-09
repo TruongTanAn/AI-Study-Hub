@@ -6,8 +6,8 @@ if (isset($_SESSION['user_id'])) {
     header('Location: dashboard.php');
     exit();
 }
-$email = isset($_GET['email']) ? htmlspecialchars($_GET['email']) : '';
-$error = isset($_GET['error']) ? htmlspecialchars($_GET['error']) : '';
+$email = isset($_GET['email']) ? htmlspecialchars($_GET['email'], ENT_QUOTES, 'UTF-8') : '';
+$error = isset($_GET['error']) ? htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8') : '';
 ?>
 <!DOCTYPE html>
 <html lang="vi">

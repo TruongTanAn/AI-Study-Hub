@@ -12,11 +12,11 @@ if (isset($_SESSION['error_message'])) {
 }
 
 if (isset($_GET['error'])) {
-    $error = htmlspecialchars($_GET['error']);
+    $error = htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8');
 }
 
 if (isset($_GET['success'])) {
-    $success = htmlspecialchars($_GET['success']);
+    $success = htmlspecialchars($_GET['success'], ENT_QUOTES, 'UTF-8');
 }
 
 if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
@@ -30,6 +30,8 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - AI Study Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -79,13 +81,13 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
 
                 <?php if($error): ?>
                     <div class="alert error">
-                        <?php echo htmlspecialchars($error); ?>
+                        <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if($success): ?>
                     <div class="alert success">
-                        <?php echo htmlspecialchars($success); ?>
+                        <?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                 <?php endif; ?>
 

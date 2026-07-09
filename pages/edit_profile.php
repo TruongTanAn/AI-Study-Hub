@@ -37,6 +37,8 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chỉnh sửa trang cá nhân - AI Study Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/home.css">
     <link rel="stylesheet" href="../assets/css/profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -76,7 +78,7 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
             <a href="dashboard.php"><i class="fas fa-brain"></i> AI Study Hub</a>
         </div>
         <div class="user-info">
-            <span>Xin chào, <strong><?php echo htmlspecialchars($user['full_name']); ?></strong></span>
+            <span>Xin chào, <strong><?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?></strong></span>
             <a href="profile.php"><i class="fas fa-user"></i> Hồ sơ</a>
             <a href="../backend/logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
@@ -88,7 +90,7 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
             <div class="alert error">
                 <i class="fas fa-exclamation-circle"></i>
                 <?php 
-                    echo htmlspecialchars($_SESSION['error_message']); 
+                    echo htmlspecialchars($_SESSION['error_message'] ?? '', ENT_QUOTES, 'UTF-8'); 
                     unset($_SESSION['error_message']);
                 ?>
             </div>
@@ -98,7 +100,7 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
             <div class="alert success">
                 <i class="fas fa-check-circle"></i>
                 <?php 
-                    echo htmlspecialchars($_SESSION['success_message']); 
+                    echo htmlspecialchars($_SESSION['success_message'] ?? '', ENT_QUOTES, 'UTF-8'); 
                     unset($_SESSION['success_message']);
                 ?>
             </div>
@@ -112,7 +114,7 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
                 <div class="profile-details">
                     <!-- Avatar section with click-to-upload overlay -->
                     <div class="avatar-container">
-                        <img src="<?php echo htmlspecialchars($avatarPath); ?>" alt="Avatar" class="profile-avatar" id="avatar-preview">
+                        <img src="<?php echo htmlspecialchars($avatarPath, ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar" class="profile-avatar" id="avatar-preview">
                         <label for="avatar-input" class="avatar-upload-overlay">
                             <i class="fas fa-camera"></i>
                             <span>Chọn ảnh</span>
@@ -133,7 +135,7 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
                             <label for="full_name">Họ và tên <span style="color: var(--danger);">*</span></label>
                             <div class="input-wrapper">
                                 <i class="fas fa-user"></i>
-                                <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($user['full_name']); ?>" required>
+                                <input type="text" id="full_name" name="full_name" value="<?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?>" required>
                             </div>
                         </div>
 
@@ -142,7 +144,7 @@ if (!empty($user['avatar']) && $user['avatar'] !== 'default.png') {
                             <label for="email">Địa chỉ Email <span style="color: var(--danger);">*</span></label>
                             <div class="input-wrapper">
                                 <i class="fas fa-envelope"></i>
-                                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8'); ?>" required>
                             </div>
                         </div>
 

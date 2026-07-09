@@ -1,36 +1,28 @@
 <?php
-/**
- * document_detail.php
- * Lấy thông tin chi tiết tài liệu theo document_id, trả về JSON.
- */
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,
-        'message' => 'Bạn cần đăng nhập để xem chi tiết tài liệu.',
-    ]);
+        'message' => 'Ban can dang nhap de xem chi tiet tai lieu.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$documentId = (int) ($_GET['document_id'] ?? $_POST['document_id'] ?? 0);
+$documentId = (int)($_GET['document_id'] ?? $_POST['document_id'] ?? 0);
 
 if ($documentId <= 0) {
     echo json_encode([
         'success' => false,
-        'message' => 'Document ID không hợp lệ.',
-    ]);
+        'message' => 'Document ID khong hop le.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$userId = (int) $_SESSION['user_id'];
-
-require_once __DIR__ . '/../config/database.php';
+$userId = (int)$_SESSION['user_id'];
 
 $sql = 'SELECT d.document_id, d.user_id, d.subject_id, d.category_id, d.title, d.description,
                d.file_name, d.original_name, d.file_path, d.file_type, d.file_size,
@@ -44,8 +36,8 @@ $stmt = $conn->prepare($sql);
 if ($stmt === false) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.',
-    ]);
+        'message' => 'Khong the ket noi du lieu. Vui long thu lai sau.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
@@ -58,12 +50,19 @@ $stmt->close();
 if (!$documentData) {
     echo json_encode([
         'success' => false,
-        'message' => 'Không tìm thấy tài liệu.',
-    ]);
+        'message' => 'Khong tim thay tai lieu.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-$isOwner = ((int) $documentData['user_id'] === $userId);
+// FIX: Force UTF-8 on every DB string
+$documentData['title'] = to_utf8($documentData['title']);
+$documentData['description'] = to_utf8($documentData['description'] ?? '');
+$documentData['file_name'] = to_utf8($documentData['file_name']);
+$documentData['original_name'] = to_utf8($documentData['original_name']);
+$documentData['uploader_name'] = to_utf8($documentData['uploader_name']);
+
+$isOwner = ((int)$documentData['user_id'] === $userId);
 $userRole = 'user';
 
 $roleStmt = $conn->prepare('SELECT role FROM users WHERE user_id = ?');
@@ -73,7 +72,6 @@ if ($roleStmt) {
     $roleResult = $roleStmt->get_result();
     $roleData = $roleResult->fetch_assoc();
     $roleStmt->close();
-
     if ($roleData) {
         $userRole = $roleData['role'];
     }
@@ -93,12 +91,12 @@ if ($isOwner || $isAdmin) {
 if (!$canView) {
     echo json_encode([
         'success' => false,
-        'message' => 'Bạn không có quyền xem tài liệu này.',
-    ]);
+        'message' => 'Ban khong co quyen xem tai lieu nay.'
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
 
 echo json_encode([
     'success' => true,
-    'data' => $documentData,
-]);
+    'data' => $documentData
+], JSON_UNESCAPED_UNICODE);

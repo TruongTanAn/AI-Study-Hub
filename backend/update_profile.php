@@ -1,94 +1,52 @@
 <?php
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
-session_start();
-include "../config/database.php";
+header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION["user_id"])) {
-    die("Vui lòng đăng nhập");
+    die(json_encode(["success" => false, "message" => "Vui long dang nhap"], JSON_UNESCAPED_UNICODE));
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $userId = $_SESSION["user_id"];
 
-    $fullName = trim($_POST["full_name"]);
+    $fullName = trim(to_utf8($_POST["full_name"]));
     $email = trim($_POST["email"]);
 
-    // Kiểm tra rỗng
-
     if (empty($fullName)) {
-        die("Vui lòng nhập họ tên");
+        die(json_encode(["success" => false, "message" => "Vui long nhap ho ten"], JSON_UNESCAPED_UNICODE));
     }
 
     if (empty($email)) {
-        die("Vui lòng nhập email");
+        die(json_encode(["success" => false, "message" => "Vui long nhap email"], JSON_UNESCAPED_UNICODE));
     }
 
-    // Kiểm tra độ dài họ tên
-
-    if (strlen($fullName) < 2) {
-        die("Họ tên quá ngắn");
+    if (mb_strlen($fullName) < 2) {
+        die(json_encode(["success" => false, "message" => "Ho ten qua ngan"], JSON_UNESCAPED_UNICODE));
     }
-
-    // Kiểm tra email hợp lệ
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die("Email không hợp lệ");
+        die(json_encode(["success" => false, "message" => "Email khong hop le"], JSON_UNESCAPED_UNICODE));
     }
 
-    // Kiểm tra email trùng
-
-    $stmt = $conn->prepare("
-        SELECT user_id
-        FROM users
-        WHERE email = ?
-        AND user_id != ?
-    ");
-
-    $stmt->bind_param(
-        "si",
-        $email,
-        $userId
-    );
-
+    $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ? AND user_id != ?");
+    $stmt->bind_param("si", $email, $userId);
     $stmt->execute();
-
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        die("Email đã tồn tại");
+        die(json_encode(["success" => false, "message" => "Email da ton tai"], JSON_UNESCAPED_UNICODE));
     }
 
-    // Update thông tin
-
-    $stmt = $conn->prepare("
-        UPDATE users
-        SET full_name = ?, email = ?
-        WHERE user_id = ?
-    ");
-
-    $stmt->bind_param(
-        "ssi",
-        $fullName,
-        $email,
-        $userId
-    );
+    $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE user_id = ?");
+    $stmt->bind_param("ssi", $fullName, $email, $userId);
 
     if ($stmt->execute()) {
-
-        echo json_encode([
-            "success" => true,
-            "message" => "Cập nhật thành công"
-        ]);
-
+        echo json_encode(["success" => true, "message" => "Cap nhat thanh cong"], JSON_UNESCAPED_UNICODE);
     } else {
-
-        echo json_encode([
-            "success" => false,
-            "message" => "Cập nhật thất bại"
-        ]);
-
+        echo json_encode(["success" => false, "message" => "Cap nhat that bai"], JSON_UNESCAPED_UNICODE);
     }
 
 }
-?>

@@ -1,33 +1,33 @@
 <?php
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../pages/forgot_password.php');
     exit();
 }
 
-require_once __DIR__ . '/../config/database.php';
-
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 if (empty($email)) {
-    header('Location: ../pages/forgot_password.php?error=' . urlencode('Email không hợp lệ'));
+    header('Location: ../pages/forgot_password.php?error=' . urlencode('Email khong hop le'));
     exit();
 }
 
 if (empty($password)) {
-    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Vui lòng nhập mật khẩu'));
+    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Vui long nhap mat khau'));
     exit();
 }
 
-if (strlen($password) < 6) {
-    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Mật khẩu phải có ít nhất 6 ký tự'));
+if (mb_strlen($password) < 6) {
+    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Mat khau phai co it nhat 6 ky tu'));
     exit();
 }
 
 if ($password !== $confirm_password) {
-    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Mật khẩu xác nhận không khớp'));
+    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Mat khau xac nhan khong khop'));
     exit();
 }
 
@@ -38,7 +38,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    header('Location: ../pages/forgot_password.php?error=' . urlencode('Email không tồn tại'));
+    header('Location: ../pages/forgot_password.php?error=' . urlencode('Email khong ton tai'));
     exit();
 }
 
@@ -58,6 +58,6 @@ if ($stmt->execute()) {
 } else {
     $stmt->close();
     $conn->close();
-    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Có lỗi xảy ra, vui lòng thử lại'));
+    header('Location: ../pages/reset_password.php?email=' . urlencode($email) . '&error=' . urlencode('Co loi xay ra, vui long thu lai'));
     exit();
 }

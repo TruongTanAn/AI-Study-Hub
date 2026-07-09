@@ -1,109 +1,94 @@
 <?php
-
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../includes/utf8_helper.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Access-Control-Max-Age: 86400');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit;
-}
-
-function returnJson($success, $message = '', $error = '', $extra = []) {
-    $response = ['success' => $success];
-    if ($message) $response['message'] = $message;
-    if ($error) $response['error'] = $error;
-    $response = array_merge($response, $extra);
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
-    exit;
-}
 
 if (!isset($_SESSION['user_id'])) {
-    returnJson(false, '', 'Vui lòng đăng nhập để tải lên tài liệu');
+    echo json_encode(['success' => false, 'error' => 'Vui long dang nhap de tai tai lieu'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    returnJson(false, '', 'Phương thức không được hỗ trợ');
+    echo json_encode(['success' => false, 'error' => 'Phuong thuc khong duoc ho tro'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 $userId = $_SESSION['user_id'];
-$title = isset($_POST['title']) ? trim($_POST['title']) : '';
-$description = isset($_POST['description']) ? trim($_POST['description']) : '';
+$title = isset($_POST['title']) ? trim(to_utf8($_POST['title'])) : '';
+$description = isset($_POST['description']) ? trim(to_utf8($_POST['description'])) : '';
 $visibility = isset($_POST['visibility']) ? trim($_POST['visibility']) : 'public';
 $status = 'pending';
 
 if (empty($title)) {
-    returnJson(false, '', 'Tiêu đề tài liệu không được để trống');
+    echo json_encode(['success' => false, 'error' => 'Tieu de tai lieu khong duoc de trong'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
-if (strlen($title) > 255) {
-    returnJson(false, '', 'Tiêu đề quá dài (tối đa 255 ký tự)');
+if (mb_strlen($title) > 255) {
+    echo json_encode(['success' => false, 'error' => 'Tieu de qua dai (toi da 255 ky tu)'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 $fileInputName = 'file';
 if (!isset($_FILES[$fileInputName]) || empty($_FILES[$fileInputName]['name'])) {
-    returnJson(false, '', 'Vui lòng chọn file để tải lên');
+    echo json_encode(['success' => false, 'error' => 'Vui long chon file de tai len'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 $file = $_FILES[$fileInputName];
 
 if ($file['error'] !== UPLOAD_ERR_OK) {
     $uploadErrors = [
-        UPLOAD_ERR_INI_SIZE => 'File vượt quá giới hạn upload của server',
-        UPLOAD_ERR_FORM_SIZE => 'File vượt quá giới hạn upload của form',
-        UPLOAD_ERR_PARTIAL => 'File chỉ được upload một phần',
-        UPLOAD_ERR_NO_FILE => 'Không có file nào được upload',
-        UPLOAD_ERR_NO_TMP_DIR => 'Thiếu thư mục tạm để lưu file',
-        UPLOAD_ERR_CANT_WRITE => 'Không thể ghi file vào đĩa',
-        UPLOAD_ERR_EXTENSION => 'Upload bị dừng bởi extension PHP'
+        UPLOAD_ERR_INI_SIZE => 'File vuot qua gioi han upload cua server',
+        UPLOAD_ERR_FORM_SIZE => 'File vuot qua gioi han upload cua form',
+        UPLOAD_ERR_PARTIAL => 'File chi duoc upload mot phan',
+        UPLOAD_ERR_NO_FILE => 'Khong co file nao duoc upload',
+        UPLOAD_ERR_NO_TMP_DIR => 'Thieu thu muc tam de luu file',
+        UPLOAD_ERR_CANT_WRITE => 'Khong the ghi file vao dia',
+        UPLOAD_ERR_EXTENSION => 'Upload bi dung boi extension PHP'
     ];
-    $errorMsg = $uploadErrors[$file['error']] ?? 'Lỗi upload không xác định';
-    returnJson(false, '', $errorMsg);
+    $errorMsg = $uploadErrors[$file['error']] ?? 'Loi upload khong xac dinh';
+    echo json_encode(['success' => false, 'error' => $errorMsg], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $allowedExtensions = ['pdf', 'docx', 'pptx'];
 
 if (!in_array($extension, $allowedExtensions)) {
-    returnJson(false, '', 'Chỉ cho phép upload file PDF, DOCX, PPTX');
+    echo json_encode(['success' => false, 'error' => 'Chi cho phep upload file PDF, DOCX, PPTX'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 if ($file['size'] <= 0) {
-    returnJson(false, '', 'File rỗng hoặc không hợp lệ');
+    echo json_encode(['success' => false, 'error' => 'File rong hoac khong hop le'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 if ($file['size'] > 50 * 1024 * 1024) {
-    returnJson(false, '', 'File vượt quá kích thước cho phép (50MB)');
+    echo json_encode(['success' => false, 'error' => 'File vuot qua kich thuoc cho phep (50MB)'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
-$originalName = preg_replace('/[^\w\-\.]/', '_', $file['name']);
-$originalName = preg_replace('/_+/', '_', $originalName);
-$originalName = trim($originalName, '_');
+$originalName = to_utf8(preg_replace('/[^\w\-\.]/', '_', $file['name']));
+$originalName = trim(preg_replace('/_+/', '_', $originalName), '_');
 
 $timestamp = time();
 $randomString = bin2hex(random_bytes(8));
 $secureFilename = 'user_' . $userId . '_' . $timestamp . '_' . $randomString . '.' . $extension;
 
 $uploadDir = __DIR__ . '/../uploads/documents/';
-
 if (!file_exists($uploadDir)) {
     if (!mkdir($uploadDir, 0755, true)) {
-        returnJson(false, '', 'Không thể tạo thư mục lưu trữ');
+        echo json_encode(['success' => false, 'error' => 'Khong the tao thu muc luu tru'], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }
 
 if (!is_writable($uploadDir)) {
-    returnJson(false, '', 'Thư mục lưu trữ không có quyền ghi');
+    echo json_encode(['success' => false, 'error' => 'Thu muc luu tru khong co quyen ghi'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 $targetPath = $uploadDir . $secureFilename;
@@ -114,17 +99,13 @@ if (file_exists($targetPath)) {
 }
 
 if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-    returnJson(false, '', 'Không thể di chuyển file đến thư mục upload');
+    echo json_encode(['success' => false, 'error' => 'Khong the di chuyen file den thu muc upload'], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 chmod($targetPath, 0644);
 
-try {
-    require_once __DIR__ . '/../config/database.php';
-} catch (Exception $e) {
-    if (file_exists($targetPath)) @unlink($targetPath);
-    returnJson(false, '', 'Lỗi kết nối database: ' . $e->getMessage());
-}
+$categoryId = isset($_POST['category_id']) && !empty($_POST['category_id']) ? intval($_POST['category_id']) : null;
 
 $documentData = [
     'user_id' => $userId,
@@ -136,26 +117,25 @@ $documentData = [
     'file_type' => strtoupper($extension),
     'file_size' => $file['size'],
     'visibility' => $visibility,
-    'status' => $status
+    'status' => $status,
+    'category_id' => $categoryId
 ];
 
-if (isset($_POST['category_id']) && !empty($_POST['category_id'])) {
-    $documentData['category_id'] = intval($_POST['category_id']);
-}
-
 require_once __DIR__ . '/save_document.php';
-
 $saveResult = saveDocumentToDatabase($documentData);
 
 if (!$saveResult['success']) {
-    if (file_exists($targetPath)) @unlink($targetPath);
-    returnJson(false, '', 'Không thể lưu thông tin tài liệu: ' . $saveResult['error']);
+    @unlink($targetPath);
+    echo json_encode(['success' => false, 'error' => $saveResult['error']], JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 $documentId = $saveResult['document_id'];
-$fileSizeFormatted = formatFileSize($file['size']);
+$fileSizeFormatted = format_filesize($file['size']);
 
-returnJson(true, 'Tải lên tài liệu thành công', '', [
+echo json_encode([
+    'success' => true,
+    'message' => 'Tai tai lieu thanh cong',
     'document_id' => $documentId,
     'file' => [
         'name' => $originalName,
@@ -163,14 +143,4 @@ returnJson(true, 'Tải lên tài liệu thành công', '', [
         'size' => $file['size'],
         'size_formatted' => $fileSizeFormatted
     ]
-]);
-
-function formatFileSize($bytes) {
-    $units = ['B', 'KB', 'MB', 'GB'];
-    $unitIndex = 0;
-    while ($bytes >= 1024 && $unitIndex < count($units) - 1) {
-        $bytes /= 1024;
-        $unitIndex++;
-    }
-    return round($bytes, 2) . ' ' . $units[$unitIndex];
-}
+], JSON_UNESCAPED_UNICODE);
