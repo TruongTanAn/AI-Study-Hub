@@ -1,0 +1,20 @@
+[2026-07-09 14:37:47] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 14:38:03] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 14:38:03] [INVALID_API_KEY] API key chua duoc cau hinh (RAG)
+[2026-07-09 14:38:37] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 14:38:37] [INVALID_API_KEY] API key chua duoc cau hinh (RAG)
+[2026-07-09 14:40:43] [INVALID_API_KEY] API key chua duoc cau hinh (RAG)
+[2026-07-09 14:41:00] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 14:44:21] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 14:45:18] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 15:22:17] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 15:25:42] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 15:25:52] [INVALID_API_KEY] API key chua duoc cau hinh
+[2026-07-09 15:49:31] [RAG_EXTRACT_FAILED] Khong trich duoc noi dung tai lieu {"file_path":"C:\\xampp\\htdocs\\AI-Study-Hubb\\backend\/..\/uploads\/documents\/user_6_1783603317_4c18cb0e9b22d0c9.pdf","file_type":"PDF","ext":"pdf","reason":"unknown","size":4029129}
+[2026-07-09 15:49:31] [RAG_EXTRACT_FAILED] Tai lieu ton tai nhung khong trich duoc text {"document_id":11,"file_path":"C:\\xampp\\htdocs\\AI-Study-Hubb\\backend\/..\/uploads\/documents\/user_6_1783603317_4c18cb0e9b22d0c9.pdf","file_type":"PDF","reason":"empty_content"}
+[2026-07-09 15:52:18] [RAG_EXTRACT_FAILED] Khong trich duoc noi dung tai lieu {"file_path":"C:\\xampp\\htdocs\\AI-Study-Hubb\\backend\/..\/uploads\/documents\/user_6_1783603317_4c18cb0e9b22d0c9.pdf","file_type":"PDF","ext":"pdf","reason":"unknown","size":4029129}
+[2026-07-09 15:52:18] [RAG_EXTRACT_FAILED] Tai lieu ton tai nhung khong trich duoc text {"document_id":11,"file_path":"C:\\xampp\\htdocs\\AI-Study-Hubb\\backend\/..\/uploads\/documents\/user_6_1783603317_4c18cb0e9b22d0c9.pdf","file_type":"PDF","reason":"empty_content"}
+[2026-07-09 15:55:19] [INVALID_API_KEY] OpenRouter tu choi quyen truy cap {"http_status":401}
+[2026-07-09 15:55:43] [INVALID_API_KEY] OpenRouter tu choi quyen truy cap {"http_status":401}
+[2026-07-09 16:07:00] [RAG_EXTRACT_FAILED] Khong trich duoc noi dung tai lieu {"file_path":"C:\\xampp\\htdocs\\AI-Study-Hubb\\backend\/..\/uploads\/documents\/user_6_1783603317_4c18cb0e9b22d0c9.pdf","file_type":"PDF","ext":"pdf","reason":"unknown","size":4029129}
+[2026-07-09 16:07:00] [RAG_EXTRACT_FAILED] Tai lieu ton tai nhung khong trich duoc text {"document_id":11,"file_path":"C:\\xampp\\htdocs\\AI-Study-Hubb\\backend\/..\/uploads\/documents\/user_6_1783603317_4c18cb0e9b22d0c9.pdf","file_type":"PDF","reason":"empty_content"}

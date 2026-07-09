@@ -726,7 +726,6 @@ $fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name']);
         }
 
         function askAIChatbot(id) {
-            alert('Tính năng Hỏi đáp AI về tài liệu đang được tích hợp. Bạn sẽ được chuyển tới Chatbot!');
             window.location.href = 'chatbot.php?doc_id=' + id;
         }
     </script>

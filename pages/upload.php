@@ -1,8 +1,17 @@
 <?php
 require_once '../includes/auth_check.php';
+require_once '../config/database.php';
 
 $success_msg = isset($_GET['success']) ? htmlspecialchars($_GET['success']) : '';
 $error_msg = isset($_GET['error']) ? htmlspecialchars($_GET['error']) : '';
+
+$categories = [];
+$catResult = @$conn->query("SELECT category_id, category_name FROM categories ORDER BY category_id");
+if ($catResult) {
+    while ($row = $catResult->fetch_assoc()) {
+        $categories[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -435,13 +444,11 @@ $error_msg = isset($_GET['error']) ? htmlspecialchars($_GET['error']) : '';
                         required
                     >
                         <option value="">— Chọn danh mục —</option>
-                        <option value="1">Toán học</option>
-                        <option value="2">Vật lý</option>
-                        <option value="3">Hóa học</option>
-                        <option value="4">Lập trình</option>
-                        <option value="5">Ngoại ngữ</option>
-                        <option value="6">Kinh tế</option>
-                        <option value="7">Khác</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo (int)$cat['category_id']; ?>">
+                                <?php echo htmlspecialchars($cat['category_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
