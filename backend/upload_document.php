@@ -86,6 +86,45 @@ if ($file['size'] > 50 * 1024 * 1024) {
     returnJson(false, '', 'File vượt quá kích thước cho phép (50MB)');
 }
 
+// Kiem tra MIME type (chan upload file doc hai - chi validate khi extension co ve OK)
+if (function_exists('finfo_open')) {
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    if ($finfo !== false) {
+        $detectedMime = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        $allowedMimes = [
+            'pdf'  => ['application/pdf'],
+            'docx' => [
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/msword',
+                'application/zip',
+                'application/octet-stream',
+            ],
+            'pptx' => [
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.ms-powerpoint',
+                'application/zip',
+                'application/octet-stream',
+            ],
+        ];
+        if ($detectedMime && isset($allowedMimes[$extension])
+            && !in_array($detectedMime, $allowedMimes[$extension], true)) {
+            returnJson(false, '', 'MIME type không hợp lệ cho định dạng ' . strtoupper($extension));
+        }
+    }
+}
+
+// Scan noi dung PHP/shell
+$fileContent = @file_get_contents($file['tmp_name'], false, null, 0, 8192);
+if ($fileContent !== false) {
+    if (preg_match('/<\?php/i', $fileContent)) {
+        returnJson(false, '', 'File chứa mã PHP không được phép upload');
+    }
+    if (preg_match('/#!\/bin\/(ba)?sh/i', $fileContent)) {
+        returnJson(false, '', 'File chứa shell script không được phép');
+    }
+}
+
 $originalName = preg_replace('/[^\w\-\.]/', '_', $file['name']);
 $originalName = preg_replace('/_+/', '_', $originalName);
 $originalName = trim($originalName, '_');
@@ -94,45 +133,42 @@ $timestamp = time();
 $randomString = bin2hex(random_bytes(8));
 $secureFilename = 'user_' . $userId . '_' . $timestamp . '_' . $randomString . '.' . $extension;
 
-$uploadDir = __DIR__ . '/../uploads/documents/';
+// Upload truc tiep len Supabase Storage (KHONG qua uploads/ local)
+require_once __DIR__ . '/../config/cloud_storage.php';
 
-if (!file_exists($uploadDir)) {
-    if (!mkdir($uploadDir, 0755, true)) {
-        returnJson(false, '', 'Không thể tạo thư mục lưu trữ');
+$uploadResult = CloudStorage::upload($file['tmp_name'], $secureFilename, $userId, 'documents');
+
+if (!$uploadResult['success']) {
+    $errMsg = isset($uploadResult['error']) ? $uploadResult['error'] : 'Upload thất bại';
+    if (function_exists('ai_log')) {
+        ai_log('supabase_upload_failed', 'Upload tai lieu that bai', [
+            'user_id'     => $userId,
+            'file_name'   => $secureFilename,
+            'file_size'   => $file['size'],
+            'error'       => $errMsg,
+        ]);
     }
+    returnJson(false, '', $errMsg);
 }
 
-if (!is_writable($uploadDir)) {
-    returnJson(false, '', 'Thư mục lưu trữ không có quyền ghi');
-}
+$publicUrl = $uploadResult['url'];
+$objectPath = isset($uploadResult['object_path']) ? $uploadResult['object_path'] : $secureFilename;
 
-$targetPath = $uploadDir . $secureFilename;
-
-if (file_exists($targetPath)) {
-    $secureFilename = 'user_' . $userId . '_retry_' . time() . '_' . $randomString . '.' . $extension;
-    $targetPath = $uploadDir . $secureFilename;
-}
-
-if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-    returnJson(false, '', 'Không thể di chuyển file đến thư mục upload');
-}
-
-chmod($targetPath, 0644);
-
+// Luu DB: file_path = public URL (de preview/download truc tiep va tuong thich nguoc)
 try {
     require_once __DIR__ . '/../config/database.php';
 
     $documentData = [
-        'user_id' => $userId,
-        'title' => $title,
-        'description' => $description,
-        'file_name' => $secureFilename,
-        'original_name' => $originalName,
-        'file_path' => $targetPath,
-        'file_type' => strtoupper($extension),
-        'file_size' => $file['size'],
-        'visibility' => $visibility,
-        'status' => $status
+        'user_id'        => $userId,
+        'title'          => $title,
+        'description'    => $description,
+        'file_name'      => $secureFilename,
+        'original_name'  => $originalName,
+        'file_path'      => $publicUrl,
+        'file_type'      => strtoupper($extension),
+        'file_size'      => $file['size'],
+        'visibility'     => $visibility,
+        'status'         => $status,
     ];
 
     if (isset($_POST['category_id']) && !empty($_POST['category_id'])) {
@@ -144,24 +180,42 @@ try {
     $saveResult = saveDocumentToDatabase($documentData);
 
     if (!$saveResult['success']) {
+        // Rollback: xoa file tren Supabase neu luu DB loi
+        if (!empty($objectPath)) {
+            @CloudStorage::delete($objectPath);
+        } elseif (!empty($publicUrl)) {
+            @CloudStorage::delete($publicUrl);
+        }
         throw new Exception($saveResult['error']);
     }
 } catch (Exception $e) {
-    if (file_exists($targetPath)) @unlink($targetPath);
     returnJson(false, '', 'Lỗi lưu trữ dữ liệu: ' . $e->getMessage());
 }
 
 $documentId = $saveResult['document_id'];
 $fileSizeFormatted = formatFileSize($file['size']);
 
+if (function_exists('ai_log')) {
+    ai_log('supabase_upload_success', 'Upload tai lieu thanh cong', [
+        'user_id'     => $userId,
+        'document_id' => $documentId,
+        'file_name'   => $secureFilename,
+        'file_size'   => $file['size'],
+        'url'         => $publicUrl,
+    ]);
+}
+
 returnJson(true, 'Tải lên tài liệu thành công', '', [
     'document_id' => $documentId,
+    'file_url'    => $publicUrl,
     'file' => [
-        'name' => $originalName,
-        'type' => strtoupper($extension),
-        'size' => $file['size'],
-        'size_formatted' => $fileSizeFormatted
-    ]
+        'name'            => $originalName,
+        'type'            => strtoupper($extension),
+        'size'            => $file['size'],
+        'size_formatted'  => $fileSizeFormatted,
+        'url'             => $publicUrl,
+        'storage'         => 'supabase',
+    ],
 ]);
 
 function formatFileSize($bytes) {

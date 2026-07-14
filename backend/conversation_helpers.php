@@ -307,21 +307,42 @@ if (!function_exists('ai_db_read_document_text')) {
      * Trich noi dung van ban tu mot tai lieu de lam context cho RAG.
      * Ho tro: .pdf .docx .pptx .txt .md
      * Tra ve '' neu khong doc duoc (kem ly do trong $debug neu truyen vao).
+     *
+     * Tuong thich Supabase Storage:
+     *   - Neu file_path la Supabase public URL -> download ve file tam
+     *   - Neu la duong dan local -> doc truc tiep
      */
     function ai_db_read_document_text(array $document, int $maxChars = 6000): string {
         if (empty($document['file_path'])) {
             return '';
         }
         $path = (string) $document['file_path'];
+
+        $isSupabaseUrl = false;
+        if (!class_exists('CloudStorage')) {
+            $cloudPath = __DIR__ . '/../config/cloud_storage.php';
+            if (is_file($cloudPath)) {
+                require_once $cloudPath;
+            }
+        }
+        if (class_exists('CloudStorage')) {
+            $isSupabaseUrl = CloudStorage::isSupabaseUrl($path);
+        }
+
+        // Lay extension: uu tien tu file_name (chinh xac nhat)
+        $fileName = isset($document['file_name']) ? (string) $document['file_name'] : '';
+        $ext = strtolower((string) pathinfo($fileName, PATHINFO_EXTENSION));
+        if ($ext === '') {
+            $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+        }
+
+        if ($isSupabaseUrl) {
+            return ai_db_read_supabase_document_text($path, $ext, $maxChars);
+        }
+
         if (!is_file($path) || !is_readable($path)) {
             return '';
         }
-
-        // Lay extension tu file_path (cach tin cay nhat)
-        $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
-
-        // Mot so file upload co file_type rong hoac khong khop extension:
-        // uu tien ext tu file_path.
 
         if (!function_exists('ai_extract_document_text')) {
             return '';
@@ -336,7 +357,124 @@ if (!function_exists('ai_db_read_document_text')) {
                 'file_type' => isset($document['file_type']) ? (string) $document['file_type'] : '',
                 'ext'       => $ext,
                 'reason'    => isset($debug['reason']) ? (string) $debug['reason'] : 'unknown',
-                'size'      => is_file($path) ? filesize($path) : 0,
+                'size'      => filesize($path),
+            ]);
+        }
+
+        return $text;
+    }
+}
+
+/**
+ * Download file tu Supabase ve file tam roi trich text.
+ * Trang thai: text tra ve da duoc rut gon whitespace + gioi han maxChars.
+ *
+ * Luu y:
+ *   - Su dung Authorization Bearer (Supabase secret key) de lam viec voi ca
+ *     bucket public lan bucket private.
+ *   - File tam se tu duoc don dep sau khi trich xuat xong.
+ */
+if (!function_exists('ai_db_read_supabase_document_text')) {
+    function ai_db_read_supabase_document_text(string $url, string $ext, int $maxChars): string {
+        if (!function_exists('curl_init')) {
+            return '';
+        }
+        if ($ext === '' || !in_array($ext, ['pdf', 'docx', 'pptx', 'txt', 'md', 'markdown'], true)) {
+            return '';
+        }
+
+        $tmp = @tempnam(sys_get_temp_dir(), 'ai_rag_');
+        if ($tmp === false) {
+            return '';
+        }
+
+        // Bat buoc phai rename sang extension chinh xac de cac parser (PharData/PDF) nhan dien
+        $tmpWithExt = $tmp . '.' . strtolower($ext);
+        if (!@rename($tmp, $tmpWithExt)) {
+            @unlink($tmp);
+            $tmpWithExt = $tmp; // fallback giu ten goc neu rename that bai
+        }
+
+        // Header Authorization: su dung Secret Key de dam bao tuong thich
+        // (neu bucket public thi header bi bo qua, khong anh huong).
+        $headers = [];
+        if (defined('SUPABASE_SECRET_KEY') && SUPABASE_SECRET_KEY !== '') {
+            $headers[] = 'Authorization: Bearer ' . SUPABASE_SECRET_KEY;
+            $headers[] = 'apikey: ' . SUPABASE_SECRET_KEY;
+        } elseif (defined('SUPABASE_PUBLISHABLE_KEY') && SUPABASE_PUBLISHABLE_KEY !== '') {
+            $headers[] = 'Authorization: Bearer ' . SUPABASE_PUBLISHABLE_KEY;
+            $headers[] = 'apikey: ' . SUPABASE_PUBLISHABLE_KEY;
+        }
+
+        $ch = curl_init($url);
+        if ($ch === false) {
+            @unlink($tmpWithExt);
+            return '';
+        }
+
+        $fp = @fopen($tmpWithExt, 'wb');
+        if ($fp === false) {
+            curl_close($ch);
+            @unlink($tmpWithExt);
+            return '';
+        }
+
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        if (!empty($headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
+
+        $ok = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        // ep flush va dong file
+        fflush($fp);
+        fclose($fp);
+
+        if ($ok === false || $errno !== 0 || $httpCode >= 400) {
+            @unlink($tmpWithExt);
+            if (function_exists('ai_log')) {
+                ai_log('supabase_download_failed', 'Khong download duoc file tu Supabase', [
+                    'url'         => $url,
+                    'http_status' => $httpCode,
+                    'errno'       => $errno,
+                    'curl_error'  => $curlError,
+                ]);
+            }
+            return '';
+        }
+
+        clearstatcache(true, $tmpWithExt);
+        $size = @filesize($tmpWithExt);
+        if ($size === false || $size <= 0) {
+            @unlink($tmpWithExt);
+            return '';
+        }
+
+        if (!function_exists('ai_extract_document_text')) {
+            @unlink($tmpWithExt);
+            return '';
+        }
+
+        $debug = null;
+        $text = ai_extract_document_text($tmpWithExt, $ext, $maxChars, $debug);
+
+        @unlink($tmpWithExt);
+
+        if ($text === '' && function_exists('ai_log')) {
+            ai_log('rag_extract_failed', 'Khong trich duoc noi dung tai lieu tu Supabase', [
+                'url'    => $url,
+                'ext'    => $ext,
+                'reason' => isset($debug['reason']) ? (string) $debug['reason'] : 'unknown',
+                'size'   => $size,
             ]);
         }
 

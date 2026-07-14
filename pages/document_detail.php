@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/auth_check.php';
 require_once '../config/database.php';
+require_once '../config/cloud_storage.php';
 
 $documentId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
@@ -81,8 +82,17 @@ $statusLabels = [
 ];
 $statusClass = $doc['status'];
 
-// Construct file URL
-$fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name']);
+// Construct file URL (Supabase hoac local)
+$filePath = (string) $doc['file_path'];
+$fileUrl  = '';
+$isSupabasePreview = CloudStorage::isSupabaseUrl($filePath);
+
+if ($isSupabasePreview) {
+    $fileUrl = $filePath; // Supabase public URL -> iframe truc tiep
+} else {
+    // Fallback local - dung download.php de dam bao permission check
+    $fileUrl = '../backend/download.php?id=' . $documentId;
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -614,18 +624,49 @@ $fileUrl = '../uploads/documents/' . htmlspecialchars($doc['file_name']);
                 
                 <?php if ($fileType === 'PDF'): ?>
                     <div class="pdf-frame-wrapper">
-                        <!-- Use relative path to uploads directory for client access -->
-                        <iframe src="<?php echo $fileUrl; ?>#toolbar=0" class="pdf-iframe"></iframe>
+                        <?php
+                            $iframeSrc = htmlspecialchars($fileUrl);
+                            if ($isSupabasePreview && strpos($iframeSrc, '#') === false) {
+                                // An toolbar PDF.js mac dinh cua trinh duyet
+                                $iframeSrc .= '#toolbar=0';
+                            }
+                        ?>
+                        <iframe src="<?php echo $iframeSrc; ?>" class="pdf-iframe"></iframe>
                     </div>
                 <?php else: ?>
-                    <div class="placeholder-preview <?php echo strtolower($fileType); ?>">
-                        <i class="fas <?php echo $fileType === 'DOCX' ? 'fa-file-word' : 'fa-file-powerpoint'; ?>"></i>
-                        <h4>Không hỗ trợ xem trước cho tệp <?php echo $fileType; ?></h4>
-                        <p>Trình duyệt không thể nhúng trực tiếp tài liệu Word hoặc PowerPoint. Hãy tải xuống để xem nội dung đầy đủ một cách tốt nhất.</p>
-                        <a href="../backend/download.php?id=<?php echo $doc['document_id']; ?>" class="btn-action btn-download" style="width: auto; padding: 12px 24px;">
-                            <i class="fas fa-download"></i> Tải xuống ngay
-                        </a>
-                    </div>
+                    <?php
+                        $lowerType = strtolower($fileType);
+                        $iconClass = ($lowerType === 'docx') ? 'fa-file-word' : 'fa-file-powerpoint';
+                        $placeholderClass = ($lowerType === 'docx') ? 'docx' : 'pptx';
+                        $downloadHref = '../backend/download.php?id=' . $documentId;
+
+                        // Neu la Supabase URL -> show preview qua Microsoft Office Online
+                        // (DOCX/PPTX can URL public de MS Office stream)
+                        $showOfficeOnline = $isSupabasePreview && in_array($lowerType, ['docx', 'pptx'], true);
+                        $officeSrc = '';
+                        if ($showOfficeOnline) {
+                            $officeSrc = 'https://view.officeapps.live.com/op/embed.aspx?src=' . rawurlencode($fileUrl);
+                        }
+                    ?>
+                    <?php if ($showOfficeOnline): ?>
+                        <div class="pdf-frame-wrapper" style="height:640px;">
+                            <iframe src="<?php echo htmlspecialchars($officeSrc); ?>" class="pdf-iframe"></iframe>
+                        </div>
+                        <p style="font-size:0.78rem;color:var(--gray);margin-top:8px;text-align:center;">
+                            <i class="fas fa-info-circle"></i>
+                            Xem trước bằng Microsoft Office Online Viewer.
+                            <a href="<?php echo $downloadHref; ?>" style="color:var(--primary);font-weight:600;">Tải xuống</a> nếu cần chỉnh sửa.
+                        </p>
+                    <?php else: ?>
+                        <div class="placeholder-preview <?php echo $placeholderClass; ?>">
+                            <i class="fas <?php echo $iconClass; ?>"></i>
+                            <h4>Không hỗ trợ xem trước cho tệp <?php echo $fileType; ?></h4>
+                            <p>Trình duyệt không thể nhúng trực tiếp tài liệu Word hoặc PowerPoint. Hãy tải xuống để xem nội dung đầy đủ một cách tốt nhất.</p>
+                            <a href="<?php echo $downloadHref; ?>" class="btn-action btn-download" style="width: auto; padding: 12px 24px;">
+                                <i class="fas fa-download"></i> Tải xuống ngay
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>

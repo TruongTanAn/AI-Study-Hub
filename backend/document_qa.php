@@ -131,13 +131,20 @@ if (!function_exists('ai_document_qa')) {
             (int) ai_config_get('max_context_chars', 6000)
         );
         if ($context === '') {
-            $reason = is_file((string) $document['file_path'])
-                ? 'empty_content'
-                : 'file_missing';
+            $filePath = (string) ($document['file_path'] ?? '');
+            $isSupabaseUrl = false;
+            if (class_exists('CloudStorage')) {
+                $isSupabaseUrl = CloudStorage::isSupabaseUrl($filePath);
+            }
+            if ($isSupabaseUrl) {
+                $reason = 'supabase_fetch_or_extract_failed';
+            } else {
+                $reason = is_file($filePath) ? 'empty_content' : 'file_missing';
+            }
             if (function_exists('ai_log')) {
                 ai_log('rag_extract_failed', 'Tai lieu ton tai nhung khong trich duoc text', [
                     'document_id' => $documentId,
-                    'file_path'   => isset($document['file_path']) ? (string) $document['file_path'] : '',
+                    'file_path'   => $filePath,
                     'file_type'   => isset($document['file_type']) ? (string) $document['file_type'] : '',
                     'reason'      => $reason,
                 ]);

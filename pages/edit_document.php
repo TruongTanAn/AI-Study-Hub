@@ -486,7 +486,7 @@ $fileType = strtoupper($doc['file_type']);
                 <span id="alert-text"></span>
             </div>
 
-            <form id="edit-form" novalidate>
+            <form id="edit-form" enctype="multipart/form-data" novalidate>
                 <input type="hidden" name="document_id" value="<?php echo $doc['document_id']; ?>">
 
                 <!-- Title -->
@@ -552,6 +552,29 @@ $fileType = strtoupper($doc['file_type']);
                     </select>
                 </div>
 
+                <!-- Replace file (optional) -->
+                <div class="form-group">
+                    <label for="doc-file">
+                        <i class="fas fa-sync-alt" style="color: var(--primary);"></i>
+                        Thay thế file (tùy chọn)
+                    </label>
+                    <input
+                        type="file"
+                        id="doc-file"
+                        name="file"
+                        class="form-control"
+                        accept=".pdf,.docx,.pptx"
+                    >
+                    <small style="display:block;margin-top:6px;color:var(--gray);">
+                        Nếu chọn file mới, file cũ trên hệ thống sẽ bị xóa vĩnh viễn.
+                        Định dạng hỗ trợ: PDF, DOCX, PPTX (tối đa 50MB).
+                    </small>
+                    <div class="selected-file-badge" id="selected-file-badge" style="display:none;align-items:center;gap:10px;margin-top:10px;padding:10px 16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;font-size:.875rem;color:var(--primary);font-weight:500;text-align:left;word-break:break-all;">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="selected-file-name">—</span>
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="form-actions">
                     <a href="document_detail.php?id=<?php echo $doc['document_id']; ?>" class="btn-cancel">
@@ -599,6 +622,21 @@ $fileType = strtoupper($doc['file_type']);
                     return;
                 }
 
+                // Validate optional new file
+                const fileInput = document.getElementById('doc-file');
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    const f = fileInput.files[0];
+                    const ext = (f.name.split('.').pop() || '').toLowerCase();
+                    if (['pdf','docx','pptx'].indexOf(ext) === -1) {
+                        showAlert('Chỉ chấp nhận file PDF, DOCX, PPTX.');
+                        return;
+                    }
+                    if (f.size > 50 * 1024 * 1024) {
+                        showAlert('File vượt quá 50MB.');
+                        return;
+                    }
+                }
+
                 // Prepare data
                 const formData = new FormData(form);
 
@@ -633,6 +671,21 @@ $fileType = strtoupper($doc['file_type']);
                     submitBtn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
                 }
             });
+
+            // Hien thi ten file moi khi user chon
+            const newFileInput = document.getElementById('doc-file');
+            const newFileBadge = document.getElementById('selected-file-badge');
+            const newFileName  = document.getElementById('selected-file-name');
+            if (newFileInput) {
+                newFileInput.addEventListener('change', function () {
+                    if (this.files && this.files.length > 0) {
+                        newFileName.textContent = this.files[0].name;
+                        newFileBadge.style.display = 'flex';
+                    } else {
+                        newFileBadge.style.display = 'none';
+                    }
+                });
+            }
         });
     </script>
 </body>

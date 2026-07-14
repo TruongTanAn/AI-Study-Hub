@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/_guard.php';
 require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../config/cloud_storage.php';
 
 $flash = ['type' => '', 'msg' => ''];
 
@@ -19,10 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $del = $conn->prepare('DELETE FROM documents WHERE document_id = ?');
                 $del->bind_param('i', $docId);
                 if ($del->execute() && $del->affected_rows > 0) {
-                    if (!empty($row['file_path']) && is_file($row['file_path'])) {
-                        @unlink($row['file_path']);
+                    $oldPath = (string) ($row['file_path'] ?? '');
+                    if ($oldPath !== '') {
+                        @CloudStorage::delete($oldPath);
+                        // Don dep local neu con sot
+                        if (CloudStorage::isLocalUploadPath($oldPath)) {
+                            $abs = CloudStorage::toAbsoluteLocalPath($oldPath);
+                            if ($abs !== null && is_file($abs)) {
+                                @unlink($abs);
+                            }
+                        }
                     }
-                    $flash = ['type' => 'success', 'msg' => "Đã xóa tài liệu #$docId."];
+                    $flash = ['type' => 'success', 'msg' => "Đã xóa tài liệu #$docId và file trên Supabase Storage."];
                 } else {
                     $flash = ['type' => 'error', 'msg' => 'Không thể xóa (có thể có dữ liệu liên quan).'];
                 }

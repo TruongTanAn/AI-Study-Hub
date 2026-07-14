@@ -350,11 +350,16 @@
             if (f.preview === 'text' && f.text) {
                 body = '<pre style="white-space:pre-wrap; font-family:inherit;">' + escapeHtml(f.text) + '</pre>';
             } else if (f.preview === 'pdf' && f.url) {
-                body = '<iframe src="' + escapeHtml(f.url) + '" style="width:100%;height:220px;border:none;"></iframe>';
+                body = '<iframe src="' + escapeHtml(f.url) + '" style="width:100%;height:360px;border:none;border-radius:8px;"></iframe>';
             } else if (f.preview === 'image' && f.url) {
-                body = '<img src="' + escapeHtml(f.url) + '" style="max-width:100%;max-height:220px;display:block;margin:0 auto;border-radius:8px;" />';
+                body = '<img src="' + escapeHtml(f.url) + '" style="max-width:100%;max-height:360px;display:block;margin:0 auto;border-radius:8px;" />';
+            } else if (f.preview === 'office_online' && f.url) {
+                // Microsoft Office Online viewer - ho tro DOCX, PPTX, XLSX,...
+                var officeSrc = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(f.url);
+                body = '<iframe src="' + officeSrc + '" style="width:100%;height:360px;border:none;border-radius:8px;"></iframe>';
+                body += '<p style="font-size:0.78rem;color:#94a3b8;margin-top:6px;text-align:center;">Preview qua Microsoft Office Online. Cần kết nối Internet.</p>';
             } else if (!f.exists) {
-                body = '<div class="preview-empty">File vật lý không tồn tại trên máy chủ.</div>';
+                body = '<div class="preview-empty">File không tồn tại trên hệ thống lưu trữ (Supabase Storage).</div>';
             } else {
                 body = '<div class="preview-empty">Định dạng file này chưa hỗ trợ xem nhanh. Bạn vẫn có thể hỏi AI về tài liệu.</div>';
             }

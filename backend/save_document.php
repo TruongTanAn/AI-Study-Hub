@@ -223,7 +223,7 @@ function deleteDocument($documentId, $userId = null) {
 
     if ($userId !== null) {
         $userId = intval($userId);
-        $checkStmt = $conn->prepare("SELECT document_id, file_path FROM documents WHERE document_id = ? AND user_id = ?");
+        $checkStmt = $conn->prepare("SELECT document_id, file_path, file_name FROM documents WHERE document_id = ? AND user_id = ?");
 
         if (!$checkStmt) {
             return [
@@ -234,7 +234,7 @@ function deleteDocument($documentId, $userId = null) {
 
         $checkStmt->bind_param("ii", $documentId, $userId);
     } else {
-        $checkStmt = $conn->prepare("SELECT document_id, file_path FROM documents WHERE document_id = ?");
+        $checkStmt = $conn->prepare("SELECT document_id, file_path, file_name FROM documents WHERE document_id = ?");
 
         if (!$checkStmt) {
             return [
@@ -274,8 +274,10 @@ function deleteDocument($documentId, $userId = null) {
     if ($deleteDoc->execute()) {
         $deleteDoc->close();
 
-        if (!empty($document['file_path']) && file_exists($document['file_path'])) {
-            @unlink($document['file_path']);
+        // Xoa file khoi Supabase Storage (hoac don dep local neu con sot)
+        $filePath = isset($document['file_path']) ? (string) $document['file_path'] : '';
+        if ($filePath !== '') {
+            deleteDocumentStorageFile($filePath);
         }
 
         return [
@@ -290,6 +292,45 @@ function deleteDocument($documentId, $userId = null) {
         'success' => false,
         'error' => 'Không thể xóa document: ' . $error
     ];
+}
+
+/**
+ * Xoa file vat ly cua document tren Supabase Storage (neu co).
+ * Ham duoc goi tu deleteDocument() de dam bao khong con file rac tren cloud.
+ *
+ * - Neu file_path la Supabase URL          -> goi Supabase DELETE
+ * - Neu file_path la duong dan local cu    -> bo qua (se don dep sau neu can)
+ */
+if (!function_exists('deleteDocumentStorageFile')) {
+    function deleteDocumentStorageFile(string $filePath): bool {
+        if ($filePath === '') {
+            return false;
+        }
+
+        // Dam bao CloudStorage da duoc include (co the goi lan dau)
+        if (!class_exists('CloudStorage')) {
+            $cloudPath = __DIR__ . '/../config/cloud_storage.php';
+            if (is_file($cloudPath)) {
+                require_once $cloudPath;
+            }
+        }
+
+        if (!class_exists('CloudStorage')) {
+            return false;
+        }
+
+        try {
+            return (bool) CloudStorage::delete($filePath);
+        } catch (Throwable $e) {
+            if (function_exists('ai_log')) {
+                ai_log('supabase_delete_failed', 'Khong the xoa file tren Supabase', [
+                    'file_path' => $filePath,
+                    'error'     => $e->getMessage(),
+                ]);
+            }
+            return false;
+        }
+    }
 }
 
 function incrementDownloadCount($documentId) {

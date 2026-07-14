@@ -2,6 +2,7 @@
 /**
  * update_document.php
  * Validate và cập nhật thông tin tài liệu, trả về JSON.
+ * Ho tro ca truong hop thay the file (Supabase Storage).
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -25,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     ]);
     exit();
 }
+
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/cloud_storage.php';
 
 $userId = (int) $_SESSION['user_id'];
 $documentId = (int) ($_POST['document_id'] ?? 0);
@@ -126,6 +130,79 @@ if ($visibility === '') {
     $visibility = $existingDocument['visibility'];
 }
 
+// Lay file_path cu de rollback khi replace file that bai
+$oldFilePathGetStmt = $conn->prepare('SELECT file_path FROM documents WHERE document_id = ?');
+if ($oldFilePathGetStmt) {
+    $oldFilePathGetStmt->bind_param('i', $documentId);
+    $oldFilePathGetStmt->execute();
+    $oldFilePathRow = $oldFilePathGetStmt->get_result()->fetch_assoc();
+    $oldFilePathGetStmt->close();
+    $oldFilePath = $oldFilePathRow ? (string) ($oldFilePathRow['file_path'] ?? '') : '';
+} else {
+    $oldFilePath = '';
+}
+
+// ============== Xu ly file moi (neu co) ==============
+$newFilePath        = null;
+$newFileName        = null;
+$newOriginal        = null;
+$newFileType        = null;
+$newFileSize        = null;
+$uploadedObjectPath = null;
+
+if (isset($_FILES['file']) && is_array($_FILES['file'])
+    && isset($_FILES['file']['error'])
+    && (int) $_FILES['file']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $file = $_FILES['file'];
+
+    if ((int) $file['error'] !== UPLOAD_ERR_OK) {
+        $errMap = [
+            UPLOAD_ERR_INI_SIZE   => 'File vượt quá giới hạn upload của server',
+            UPLOAD_ERR_FORM_SIZE  => 'File vượt quá giới hạn upload của form',
+            UPLOAD_ERR_PARTIAL    => 'File chỉ được upload một phần',
+            UPLOAD_ERR_NO_FILE    => 'Không có file nào được upload',
+            UPLOAD_ERR_NO_TMP_DIR => 'Thiếu thư mục tạm để lưu file',
+            UPLOAD_ERR_CANT_WRITE => 'Không thể ghi file vào đĩa',
+            UPLOAD_ERR_EXTENSION  => 'Upload bị dừng bởi extension PHP',
+        ];
+        $msg = $errMap[(int) $file['error']] ?? 'Lỗi upload không xác định';
+        echo json_encode(['success' => false, 'message' => $msg]);
+        exit();
+    }
+
+    $ext = strtolower((string) pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['pdf', 'docx', 'pptx'], true)) {
+        echo json_encode(['success' => false, 'message' => 'Chỉ cho phép upload file PDF, DOCX, PPTX']);
+        exit();
+    }
+    if ((int) $file['size'] <= 0 || (int) $file['size'] > 50 * 1024 * 1024) {
+        echo json_encode(['success' => false, 'message' => 'File không hợp lệ hoặc vượt quá 50MB']);
+        exit();
+    }
+
+    $originalName = preg_replace('/[^\w\-\.]/', '_', (string) $file['name']);
+    $originalName = preg_replace('/_+/', '_', $originalName);
+    $originalName = trim($originalName, '_');
+
+    $timestamp = time();
+    $random    = bin2hex(random_bytes(8));
+    $secureFilename = 'user_' . $userId . '_' . $timestamp . '_' . $random . '.' . $ext;
+
+    $uploadResult = CloudStorage::upload($file['tmp_name'], $secureFilename, $userId, 'documents');
+    if (!$uploadResult['success']) {
+        $msg = isset($uploadResult['error']) ? $uploadResult['error'] : 'Upload file mới thất bại';
+        echo json_encode(['success' => false, 'message' => $msg]);
+        exit();
+    }
+
+    $newFilePath        = $uploadResult['url'];
+    $uploadedObjectPath = isset($uploadResult['object_path']) ? $uploadResult['object_path'] : null;
+    $newFileName        = $secureFilename;
+    $newOriginal        = $originalName;
+    $newFileType        = strtoupper($ext);
+    $newFileSize        = (int) $file['size'];
+}
+
 if ($categoryId !== null && $categoryId > 0) {
     $categoryStmt = $conn->prepare('SELECT category_id FROM categories WHERE category_id = ?');
     if ($categoryStmt) {
@@ -164,41 +241,91 @@ if ($subjectId !== null && $subjectId > 0) {
     }
 }
 
-$updateSql = 'UPDATE documents
-              SET title = ?, description = ?, category_id = ?, subject_id = ?, visibility = ?
-              WHERE document_id = ?';
-$updateStmt = $conn->prepare($updateSql);
+$replaceFile = ($newFilePath !== null);
 
-if ($updateStmt === false) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.',
-    ]);
-    exit();
+if ($replaceFile) {
+    $updateSql = 'UPDATE documents
+                  SET title = ?, description = ?, category_id = ?, subject_id = ?, visibility = ?,
+                      file_path = ?, file_name = ?, original_name = ?, file_type = ?, file_size = ?
+                  WHERE document_id = ?';
+    $updateStmt = $conn->prepare($updateSql);
+    if ($updateStmt === false) {
+        if ($uploadedObjectPath !== null) {
+            @CloudStorage::delete($uploadedObjectPath);
+        } elseif ($newFilePath !== null) {
+            @CloudStorage::delete($newFilePath);
+        }
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.']);
+        exit();
+    }
+    $updateStmt->bind_param(
+        'ssiisssssii',
+        $title,
+        $description,
+        $categoryId,
+        $subjectId,
+        $visibility,
+        $newFilePath,
+        $newFileName,
+        $newOriginal,
+        $newFileType,
+        $newFileSize,
+        $documentId
+    );
+} else {
+    $updateSql = 'UPDATE documents
+                  SET title = ?, description = ?, category_id = ?, subject_id = ?, visibility = ?
+                  WHERE document_id = ?';
+    $updateStmt = $conn->prepare($updateSql);
+
+    if ($updateStmt === false) {
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối dữ liệu. Vui lòng thử lại sau.']);
+        exit();
+    }
+
+    $updateStmt->bind_param(
+        'ssiisi',
+        $title,
+        $description,
+        $categoryId,
+        $subjectId,
+        $visibility,
+        $documentId
+    );
 }
-
-$updateStmt->bind_param(
-    'ssiisi',
-    $title,
-    $description,
-    $categoryId,
-    $subjectId,
-    $visibility,
-    $documentId
-);
 
 if ($updateStmt->execute()) {
     $updateStmt->close();
 
+    // Neu replace file thanh cong -> xoa file cu tren Supabase
+    if ($replaceFile && $oldFilePath !== '') {
+        @CloudStorage::delete($oldFilePath);
+        if (CloudStorage::isLocalUploadPath($oldFilePath)) {
+            $abs = CloudStorage::toAbsoluteLocalPath($oldFilePath);
+            if ($abs !== null && is_file($abs)) {
+                @unlink($abs);
+            }
+        }
+    }
+
     echo json_encode([
         'success' => true,
-        'message' => 'Cập nhật tài liệu thành công.',
+        'message' => $replaceFile ? 'Cập nhật tài liệu và thay file thành công.' : 'Cập nhật tài liệu thành công.',
         'document_id' => $documentId,
+        'file_replaced' => $replaceFile,
+        'new_url' => $replaceFile ? $newFilePath : null,
     ]);
     exit();
 }
 
 $updateStmt->close();
+if ($replaceFile) {
+    if ($uploadedObjectPath !== null) {
+        @CloudStorage::delete($uploadedObjectPath);
+    } elseif ($newFilePath !== null) {
+        @CloudStorage::delete($newFilePath);
+    }
+}
 
 echo json_encode([
     'success' => false,
